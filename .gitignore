@@ -1,0 +1,9 @@
+# dependencies
+node_modules/
+
+# env — never commit secrets (Step 9)
+.env
+.env.local
+.env.*.local
+apps/api/.env
+apps/web/.env.local

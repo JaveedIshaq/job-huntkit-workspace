@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+      "strict": true,
+      "module": "nodenext",
+      "moduleResolution": "nodenext",
+      "target": "ES2023",
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "forceConsistentCasingInFileNames": true,
+      "declaration": true,
+      "sourceMap": true
+    }
+  }

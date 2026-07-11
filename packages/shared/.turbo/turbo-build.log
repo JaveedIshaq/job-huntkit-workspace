@@ -1,0 +1,4 @@
+
+> @huntkit/shared@0.0.1 build /Users/javeedishaq/devwork/alchemist/job-huntkit-workspace/packages/shared
+> tsc -p tsconfig.json
+

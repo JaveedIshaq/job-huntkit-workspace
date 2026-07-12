@@ -1,0 +1,10 @@
+import * as Prisma from './internal/prismaNamespaceBrowser';
+export { Prisma };
+export * as $Enums from './enums';
+export * from './enums';
+export type ai_runs = Prisma.ai_runsModel;
+export type job_analyses = Prisma.job_analysesModel;
+export type jobs = Prisma.jobsModel;
+export type profile_chunks = Prisma.profile_chunksModel;
+export type profile_sources = Prisma.profile_sourcesModel;
+export type users = Prisma.usersModel;

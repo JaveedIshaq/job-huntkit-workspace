@@ -4,6 +4,11 @@
 
 **Spec reference:** [huntkit-mvp-spec.md](./huntkit-mvp-spec.md)
 
+> **Architecture locked — Option A (NestJS JWT):** See [huntkit-architecture.md](./huntkit-architecture.md).  
+> - **Supabase** = hosted PostgreSQL only (`DATABASE_URL`)  
+> - **Next.js** = `NEXT_PUBLIC_API_URL` only — no Supabase client  
+> - **Skip** §7 Supabase Auth; implement **NestJS JWT** (`@nestjs/jwt`, `JwtAuthGuard`) instead
+
 **Strategic context:** This build serves **both tracks** from your career plan:
 - **Track A (contractor bridge):** Proves NestJS + PostgreSQL + RAG + Next.js — the stack clients pay premium for.
 - **Track B (indie hacker):** HuntKit itself becomes portfolio proof, daily job-hunt tool, and a future $49–99 template on Lemon Squeezy.
@@ -269,7 +274,7 @@ From Supabase **Settings → API**:
 
 | Variable | Where |
 |----------|-------|
-| `SUPABASE_URL` | Project URL |
+| `SUPABASE_URL` | Project URL | 
 | `SUPABASE_ANON_KEY` | anon public key (Next.js client) |
 | `SUPABASE_JWT_SECRET` | JWT Settings → JWT Secret (NestJS verifies tokens) |
 | `DATABASE_URL` | Database → Connection string (URI, port 5432) |

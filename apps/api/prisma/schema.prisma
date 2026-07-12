@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ai_runs {
+  id                  String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id             String         @db.Uuid
+  run_type            String
+  model               String
+  prompt_tokens       Int?
+  completion_tokens   Int?
+  total_tokens        Int?
+  latency_ms          Int?
+  status              String
+  error_message       String?
+  input_preview       String?
+  output_preview      String?
+  retrieved_chunk_ids String[]       @db.Uuid
+  metadata            Json           @default("{}")
+  created_at          DateTime       @default(now()) @db.Timestamptz(6)
+  users               users          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  job_analyses        job_analyses[]
+
+  @@index([user_id, created_at(sort: Desc)], map: "idx_ai_runs_user_created")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model job_analyses {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  job_id              String   @db.Uuid
+  user_id             String   @db.Uuid
+  ai_run_id           String?  @db.Uuid
+  requirement_summary String?
+  strengths           Json     @default("[]")
+  gaps                Json     @default("[]")
+  application_bullets Json     @default("[]")
+  interview_questions Json     @default("[]")
+  citations           Json     @default("[]")
+  overall_match_score Int?
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+  ai_runs             ai_runs? @relation(fields: [ai_run_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  jobs                jobs     @relation(fields: [job_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users               users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model jobs {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id      String         @db.Uuid
+  company      String
+  role_title   String
+  job_url      String?
+  location     String?
+  status       String         @default("saved")
+  jd_text      String
+  notes        String?
+  applied_at   DateTime?      @db.Timestamptz(6)
+  created_at   DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime       @default(now()) @db.Timestamptz(6)
+  job_analyses job_analyses[]
+  users        users          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id, status], map: "idx_jobs_user_status")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model profile_chunks {
+  id                String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  profile_source_id String                @db.Uuid
+  user_id           String                @db.Uuid
+  chunk_index       Int
+  content           String
+  token_count       Int?
+  metadata          Json                  @default("{}")
+  embedding         Unsupported("vector")
+  created_at        DateTime              @default(now()) @db.Timestamptz(6)
+  profile_sources   profile_sources       @relation(fields: [profile_source_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users             users                 @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([profile_source_id, chunk_index])
+  @@index([embedding], map: "idx_profile_chunks_embedding")
+  @@index([user_id], map: "idx_profile_chunks_user")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model profile_sources {
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id        String           @db.Uuid
+  source_type    String
+  title          String
+  content        String
+  status         String           @default("processing")
+  chunk_count    Int              @default(0)
+  error_message  String?
+  created_at     DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime         @default(now()) @db.Timestamptz(6)
+  profile_chunks profile_chunks[]
+  users          users            @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model users {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email           String            @unique
+  password_hash   String?
+  display_name    String?
+  headline        String?
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime          @default(now()) @db.Timestamptz(6)
+  ai_runs         ai_runs[]
+  job_analyses    job_analyses[]
+  jobs            jobs[]
+  profile_chunks  profile_chunks[]
+  profile_sources profile_sources[]
+}

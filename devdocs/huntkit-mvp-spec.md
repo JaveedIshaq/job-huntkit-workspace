@@ -44,7 +44,7 @@
 | DB | **PostgreSQL** + **pgvector** | RAG + resume story |
 | ORM | **Prisma** or raw SQL for vectors | Prisma + `$executeRaw` for pgvector ops |
 | UI | **Next.js 14+** App Router | Landing + dashboard |
-| Auth | **NestJS JWT** or **Supabase Auth** | JWT = fewer moving parts |
+| Auth | **NestJS JWT** ✅ (locked — see huntkit-architecture.md) | Web → API only; Supabase = Postgres host |
 | AI | OpenAI `text-embedding-3-small` + `gpt-4o-mini` | Cheap, fast |
 | Files | `.md` / `.txt` paste or upload | Skip PDF in v1 |
 | Deploy | API: **Railway** / **Render** · Web: **Vercel** | Free tiers |

@@ -6,7 +6,11 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  getHello(): string {
+  async getHello(): Promise<string> {
+    const result = await this.appService.testDb();
+
+    console.log(result);
+
     return this.appService.getHello();
   }
 }

@@ -1,0 +1,298 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-huntkit-api-mvp",
+    "name": "HuntKit API",
+    "description": "Postman collection for HuntKit NestJS API (`apps/api`).\n\n**Base path:** `{{baseUrl}}` = `http://localhost:3001/api/v1`\n\n## How to use\n1. Import this file into Postman (Import → Upload).\n2. Start the API: from repo root run `pnpm dev:api` (or `pnpm --filter @huntkit/api dev`).\n3. Run **Health → GET Health** to confirm DB is up.\n4. Run **Auth → Register** (or **Login**). The test script saves `accessToken` automatically.\n5. Run **Auth → Get Me** / **Update Me** — they use `Authorization: Bearer {{accessToken}}`.\n\n## Implemented now\n- Health\n- Auth (register, login, me, update me)\n- Jobs CRUD (create, list, list by status, get, update, delete)\n\n## Not implemented yet (add when modules land)\n- Profile sources\n- Job analyze\n- Admin AI runs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api/v1"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "testEmail",
+      "value": "demo@huntkit.test"
+    },
+    {
+      "key": "testPassword",
+      "value": "password123"
+    },
+    {
+      "key": "jobId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health",
+            "description": "Public health check. Pings Postgres with `SELECT 1`. No auth required."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "  const data = pm.response.json();",
+                  "  if (data.accessToken) {",
+                  "    pm.collectionVariables.set('accessToken', data.accessToken);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"displayName\": \"HuntKit Demo\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register",
+            "description": "Create a user. Password min 8 chars. Saves `accessToken` into collection variables on success.\n\nIf email already exists, use **Login** instead."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "  const data = pm.response.json();",
+                  "  if (data.accessToken) {",
+                  "    pm.collectionVariables.set('accessToken', data.accessToken);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login",
+            "description": "Login with email + password. Saves `accessToken` for protected routes."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/me",
+            "description": "Protected. Returns current user profile (no password)."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Me",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"displayName\": \"Javeed\",\n  \"headline\": \"Full-Stack Product Engineer | NestJS + AI\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/me",
+            "description": "Protected. Update `displayName` and/or `headline`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Jobs",
+      "description": "Protected CRUD for job applications. All routes require `Authorization: Bearer {{accessToken}}` — run **Auth → Login** first. **Create Job** saves the new id into `jobId` for the get/update/delete requests.",
+      "item": [
+        {
+          "name": "Create Job",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "  const data = pm.response.json();",
+                  "  if (data.job && data.job.id) {",
+                  "    pm.collectionVariables.set('jobId', data.job.id);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company\": \"Acme\",\n  \"roleTitle\": \"Product Engineer\",\n  \"jdText\": \"NestJS + Flutter + AI. Build RAG-grounded features and ship end-to-end.\",\n  \"jobUrl\": \"https://acme.example.com/jobs/product-engineer\",\n  \"location\": \"Remote\",\n  \"notes\": \"Referred by network\",\n  \"status\": \"saved\"\n}"
+            },
+            "url": "{{baseUrl}}/jobs",
+            "description": "Create a job scoped to the current user. Required: `company`, `roleTitle`, `jdText`. Optional: `jobUrl`, `location`, `notes`, `status` (defaults to `saved`). Saves `job.id` into `jobId`."
+          },
+          "response": []
+        },
+        {
+          "name": "List Jobs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/jobs",
+            "description": "List all jobs for the current user (newest first). Returns `items` plus `countsByStatus`."
+          },
+          "response": []
+        },
+        {
+          "name": "List Jobs by Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/jobs?status=saved",
+              "host": ["{{baseUrl}}"],
+              "path": ["jobs"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "saved"
+                }
+              ]
+            },
+            "description": "Filter jobs by status. Allowed: `saved`, `applied`, `screening`, `interview`, `offer`, `rejected`, `withdrawn`."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Job by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/jobs/{{jobId}}",
+            "description": "Get one job (with its latest analysis, if any). Uses `jobId` from **Create Job**. Returns 404 if not owned by the current user."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Job",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"applied\",\n  \"notes\": \"Submitted application via referral\"\n}"
+            },
+            "url": "{{baseUrl}}/jobs/{{jobId}}",
+            "description": "Update fields on a job. Setting `status` to `applied` stamps `appliedAt`. All fields optional."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Job",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/jobs/{{jobId}}",
+            "description": "Delete a job owned by the current user. Returns `{ success: true }`."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

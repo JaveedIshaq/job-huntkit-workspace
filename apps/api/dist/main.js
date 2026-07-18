@@ -4,6 +4,7 @@ require("dotenv/config");
 const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app.module");
+const prisma_exception_filter_1 = require("./modules/shared/filters/prisma-exception.filter");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.setGlobalPrefix('api/v1');
@@ -16,6 +17,7 @@ async function bootstrap() {
         forbidNonWhitelisted: true,
         transform: true,
     }));
+    app.useGlobalFilters(new prisma_exception_filter_1.PrismaExceptionFilter());
     const port = Number(process.env.PORT ?? 3001);
     await app.listen(port);
     console.log(`Application is running on: ${await app.getUrl()}`);

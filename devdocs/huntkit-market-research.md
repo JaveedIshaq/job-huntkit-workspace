@@ -2,7 +2,7 @@
 
 **Purpose:** Answer whether HuntKit already exists as open source, and whether FastAPI or NestJS is the better backend for this project.
 
-**Related:** [huntkit-mvp-spec.md](./huntkit-mvp-spec.md)
+**Related:** [huntkit-learn-and-build.md](./huntkit-learn-and-build.md)
 
 **Date:** 9 July 2026
 

@@ -1,0 +1,13 @@
+# Netlify config for the Next.js web app in this pnpm monorepo.
+# `base` makes Netlify build inside apps/web, while pnpm still installs the
+# whole workspace above it (so the @huntkit/shared dependency resolves).
+[build]
+  base = "apps/web"
+  command = "pnpm build"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Official Next.js runtime — Netlify installs this automatically.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

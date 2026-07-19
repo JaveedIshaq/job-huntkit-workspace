@@ -4,8 +4,13 @@ import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRequireAuth } from "@/lib/auth";
 import { apiFetch, ApiError } from "@/lib/api";
-import type { AnalysisResult, Job, LatestAnalysis } from "@/lib/types";
-import { Badge, Button, Card, ErrorText } from "@/components/ui";
+import {
+  JOB_STATUSES,
+  type AnalysisResult,
+  type Job,
+  type LatestAnalysis,
+} from "@/lib/types";
+import { Badge, Button, Card, ErrorText, Select } from "@/components/ui";
 import { CopyButton } from "@/components/copy-button";
 
 function scoreTone(score: number) {
@@ -44,6 +49,7 @@ export default function JobDetailPage({
   const [analyzedAt, setAnalyzedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
+  const [savingStatus, setSavingStatus] = useState(false);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
@@ -71,6 +77,23 @@ export default function JobDetailPage({
       await load();
     })();
   }, [authLoading, load]);
+
+  async function updateStatus(status: string) {
+    setSavingStatus(true);
+    setError("");
+    try {
+      // The API stamps applied_at automatically when status becomes "applied".
+      const { job: updated } = await apiFetch<{ job: Job }>(`/jobs/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status }),
+      });
+      setJob(updated);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to update status");
+    } finally {
+      setSavingStatus(false);
+    }
+  }
 
   async function analyze() {
     setAnalyzing(true);
@@ -106,7 +129,24 @@ export default function JobDetailPage({
             {job.location ? ` · ${job.location}` : ""}
           </p>
           <div className="mt-2 flex items-center gap-2">
-            <Badge>{job.status}</Badge>
+            <Select
+              aria-label="Job status"
+              value={job.status}
+              disabled={savingStatus}
+              onChange={(e) => updateStatus(e.target.value)}
+              className="w-auto capitalize"
+            >
+              {JOB_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </Select>
+            {job.appliedAt && (
+              <span className="text-xs text-foreground/50">
+                Applied {new Date(job.appliedAt).toLocaleDateString()}
+              </span>
+            )}
             {job.jobUrl && (
               <a
                 href={job.jobUrl}

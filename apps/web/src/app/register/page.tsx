@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { ApiError } from "@/lib/api";
 import { SIGNUP_ENABLED } from "@/lib/config";
+import { Logo } from "@/components/logo";
 import { Button, Card, ErrorText, Field, Input } from "@/components/ui";
 
 export default function RegisterPage() {
@@ -34,6 +35,9 @@ export default function RegisterPage() {
   if (!SIGNUP_ENABLED) {
     return (
       <div className="mx-auto max-w-sm pt-8">
+        <div className="mb-6 flex justify-center">
+          <Logo size={28} />
+        </div>
         <Card>
           <h1 className="mb-1 text-xl font-semibold">Sign-up is closed</h1>
           <p className="mb-5 text-sm text-foreground/60">
@@ -50,6 +54,9 @@ export default function RegisterPage() {
 
   return (
     <div className="mx-auto max-w-sm pt-8">
+      <div className="mb-6 flex justify-center">
+        <Logo size={28} />
+      </div>
       <Card>
         <h1 className="mb-1 text-xl font-semibold">Create your account</h1>
         <p className="mb-5 text-sm text-foreground/60">

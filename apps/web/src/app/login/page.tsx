@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { ApiError } from "@/lib/api";
+import { Logo } from "@/components/logo";
 import { Button, Card, ErrorText, Field, Input } from "@/components/ui";
 
 export default function LoginPage() {
@@ -31,6 +32,9 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto max-w-sm pt-8">
+      <div className="mb-6 flex justify-center">
+        <Logo size={28} />
+      </div>
       <Card>
         <h1 className="mb-1 text-xl font-semibold">Welcome back</h1>
         <p className="mb-5 text-sm text-foreground/60">

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { SIGNUP_ENABLED } from "@/lib/config";
+import { Logo } from "./logo";
 import { cn } from "./ui";
 
 const LINKS = [
@@ -26,8 +27,8 @@ export function Nav() {
   return (
     <header className="sticky top-0 z-10 border-b border-black/10 bg-background/80 backdrop-blur dark:border-white/10">
       <nav className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-        <Link href={user ? "/dashboard" : "/"} className="font-semibold">
-          Hunt<span className="opacity-60">Kit</span>
+        <Link href={user ? "/dashboard" : "/"}>
+          <Logo />
         </Link>
 
         {user ? (

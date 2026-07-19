@@ -1876,7 +1876,7 @@ git push origin main   # create the GitHub repo first if needed (gh repo create)
 |---------|-------|
 | Root Directory | *(leave blank — repo root, so pnpm workspace resolves)* |
 | Runtime | Node |
-| Build Command | `corepack enable && pnpm install && pnpm --filter @huntkit/shared build && pnpm --filter @huntkit/api exec prisma generate && pnpm --filter @huntkit/api build` |
+| Build Command | `pnpm install && pnpm --filter @huntkit/shared build && pnpm --filter @huntkit/api exec prisma generate && pnpm --filter @huntkit/api build` |
 | Start Command | `pnpm --filter @huntkit/api start:prod` |
 | Health Check Path | `/api/v1/health` |
 

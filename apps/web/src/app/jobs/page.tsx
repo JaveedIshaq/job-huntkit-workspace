@@ -16,7 +16,7 @@ import {
   Textarea,
   cn,
 } from "@/components/ui";
-import { JobStatus } from "@huntkit/shared";
+import { JobStatus, composeRoleAtCompany } from "@huntkit/shared";
 
 export type ParsedJobFields = {
   company: string;
@@ -26,11 +26,14 @@ export type ParsedJobFields = {
   jdText: string;
 };
 
-function formatJobDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, {
-    month: "short",
+function formatJobDateTime(iso: string): string {
+  return new Date(iso).toLocaleString(undefined, {
+    weekday: "long",
     day: "numeric",
+    month: "long",
     year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
   });
 }
 
@@ -191,17 +194,26 @@ function JobListRow({
             <div className="min-w-0">
               <div className="font-medium">{job.roleTitle}</div>
               <div className="text-sm text-muted-foreground">
-                {job.company}
-                {job.location ? ` · ${job.location}` : ""}
+                {job.location || "Location not set"}
               </div>
-              <div className="mt-1 text-xs text-muted-foreground">
-                Saved {formatJobDate(job.createdAt)}
-                {job.appliedAt
-                  ? ` · Applied ${formatJobDate(job.appliedAt)}`
-                  : ""}
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Badge
+                  tone="blue"
+                  className="max-w-full whitespace-normal text-left leading-snug"
+                >
+                  Saved {formatJobDateTime(job.createdAt)}
+                </Badge>
+                {job.appliedAt ? (
+                  <Badge
+                    tone="green"
+                    className="max-w-full whitespace-normal text-left leading-snug"
+                  >
+                    Applied {formatJobDateTime(job.appliedAt)}
+                  </Badge>
+                ) : null}
               </div>
             </div>
-            <Badge>{job.status}</Badge>
+            <Badge>{job.status === JobStatus.SAVED && job.appliedAt ? JobStatus.APPLIED : job.status}</Badge>
           </div>
         </Link>
       </div>
@@ -221,8 +233,12 @@ function NewJobForm({ onCreated }: { onCreated: (job: Job) => void }) {
   const [pasteOpen, setPasteOpen] = useState(false);
 
   function applyParsed(fields: ParsedJobFields) {
-    if (fields.company) setCompany(fields.company);
-    if (fields.roleTitle) setRoleTitle(fields.roleTitle);
+    const nextCompany = fields.company?.trim() ?? "";
+    const nextRole = fields.roleTitle?.trim() ?? "";
+    if (nextCompany) setCompany(nextCompany);
+    if (nextRole || nextCompany) {
+      setRoleTitle(composeRoleAtCompany(nextRole, nextCompany));
+    }
     if (fields.location) setLocation(fields.location);
     if (fields.jobUrl) setJobUrl(fields.jobUrl);
     if (fields.jdText) setJdText(fields.jdText);
@@ -234,11 +250,12 @@ function NewJobForm({ onCreated }: { onCreated: (job: Job) => void }) {
     setError("");
     setLoading(true);
     try {
+      const companyTrim = company.trim();
       const { job } = await apiFetch<{ job: Job }>("/jobs", {
         method: "POST",
         body: JSON.stringify({
-          company,
-          roleTitle,
+          company: companyTrim,
+          roleTitle: composeRoleAtCompany(roleTitle, companyTrim),
           jdText,
           status,
           location: location || undefined,
@@ -281,6 +298,7 @@ function NewJobForm({ onCreated }: { onCreated: (job: Job) => void }) {
             <Input
               value={roleTitle}
               onChange={(e) => setRoleTitle(e.target.value)}
+              placeholder="e.g. Flutter Developer — saved as Role at Company"
               required
             />
           </Field>

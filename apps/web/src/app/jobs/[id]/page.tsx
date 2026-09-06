@@ -323,7 +323,15 @@ export default function JobDetailPage({
                 </Select>
                 {job.appliedAt && (
                   <span className="text-xs text-muted-foreground">
-                    Applied {new Date(job.appliedAt).toLocaleDateString()}
+                    Applied{" "}
+                    {new Date(job.appliedAt).toLocaleString(undefined, {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
                   </span>
                 )}
                 {job.jobUrl && (

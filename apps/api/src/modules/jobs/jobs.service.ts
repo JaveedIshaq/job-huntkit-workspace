@@ -10,7 +10,7 @@ import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { ParseJobPageDto } from './dto/parse-job-page.dto';
 import { PARSE_JOB_PAGE_SYSTEM_PROMPT } from './parse-job-page.constants';
-import { JobStatus } from '@huntkit/shared';
+import { JobStatus, composeRoleAtCompany, rewriteRoleCompany } from '@huntkit/shared';
 
 type PublicJobSource = {
   id: string;
@@ -139,15 +139,23 @@ export class JobsService {
       );
     }
 
-    return { company, roleTitle, location, jobUrl, jdText };
+    return {
+      company,
+      roleTitle: composeRoleAtCompany(roleTitle, company),
+      location,
+      jobUrl,
+      jdText,
+    };
   }
 
   async create(userId: string, dto: CreateJobDto) {
+    const company = dto.company.trim();
+    const roleTitle = composeRoleAtCompany(dto.roleTitle, company);
     const job = await this.prisma.jobs.create({
       data: {
         user_id: userId,
-        company: dto.company,
-        role_title: dto.roleTitle,
+        company,
+        role_title: roleTitle,
         jd_text: dto.jdText,
         job_url: dto.jobUrl ?? null,
         location: dto.location ?? null,
@@ -220,11 +228,30 @@ export class JobsService {
       appliedAt = null;
     }
 
+    const existing = await this.prisma.jobs.findFirst({
+      where: { id, user_id: userId },
+      select: { company: true, role_title: true },
+    });
+    if (!existing) throw new NotFoundException('Job not found');
+
+    const nextCompany =
+      dto.company !== undefined ? dto.company.trim() : existing.company;
+    let nextRoleTitle: string | undefined;
+    if (dto.roleTitle !== undefined) {
+      nextRoleTitle = composeRoleAtCompany(dto.roleTitle.trim(), nextCompany);
+    } else if (dto.company !== undefined) {
+      nextRoleTitle = rewriteRoleCompany(
+        existing.role_title,
+        existing.company,
+        nextCompany,
+      );
+    }
+
     const job = await this.prisma.jobs.update({
       where: { id },
       data: {
-        ...(dto.company !== undefined ? { company: dto.company } : {}),
-        ...(dto.roleTitle !== undefined ? { role_title: dto.roleTitle } : {}),
+        ...(dto.company !== undefined ? { company: nextCompany } : {}),
+        ...(nextRoleTitle !== undefined ? { role_title: nextRoleTitle } : {}),
         ...(dto.jdText !== undefined ? { jd_text: dto.jdText } : {}),
         ...(dto.jobUrl !== undefined
           ? { job_url: dto.jobUrl === '' ? null : dto.jobUrl }

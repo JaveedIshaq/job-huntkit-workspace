@@ -15,6 +15,7 @@ export declare class AnalyzeController {
         applicationBullets?: undefined;
         interviewQuestions?: undefined;
         citations?: undefined;
+        eligibility?: undefined;
         overallMatchScore?: undefined;
         usage?: undefined;
         latencyMs?: undefined;
@@ -48,6 +49,7 @@ export declare class AnalyzeController {
             excerpt: string;
             score: number;
         }[];
+        eligibility: import("./analyze.service").Eligibility;
         overallMatchScore: number;
         usage: {
             promptTokens: number;

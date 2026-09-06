@@ -20,6 +20,7 @@ exports.AnalyzeModule = AnalyzeModule = __decorate([
         imports: [profile_module_1.ProfileModule],
         controllers: [analyze_controller_1.AnalyzeController],
         providers: [analyze_service_1.AnalyzeService, openai_chat_service_1.OpenAiChatService],
+        exports: [openai_chat_service_1.OpenAiChatService],
     })
 ], AnalyzeModule);
 //# sourceMappingURL=analyze.module.js.map

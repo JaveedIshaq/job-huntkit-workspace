@@ -34,6 +34,36 @@ let ProfileIngestService = class ProfileIngestService {
         await this.indexSource(userId, source.id, dto.content);
         return this.getSource(userId, source.id);
     }
+    async updateSource(userId, sourceId, dto) {
+        const existing = await this.prisma.profile_sources.findFirst({
+            where: { id: sourceId, user_id: userId },
+        });
+        if (!existing)
+            throw new common_1.NotFoundException('Source not found');
+        const nextTitle = dto.title ?? existing.title;
+        const nextType = dto.sourceType ?? existing.source_type;
+        const nextContent = dto.content ?? existing.content;
+        const contentChanged = nextContent !== existing.content;
+        await this.prisma.profile_sources.update({
+            where: { id: sourceId },
+            data: {
+                title: nextTitle,
+                source_type: nextType,
+                content: nextContent,
+                updated_at: new Date(),
+                ...(contentChanged
+                    ? { status: 'processing', chunk_count: 0, error_message: null }
+                    : {}),
+            },
+        });
+        if (contentChanged) {
+            await this.prisma.profile_chunks.deleteMany({
+                where: { profile_source_id: sourceId, user_id: userId },
+            });
+            await this.indexSource(userId, sourceId, nextContent);
+        }
+        return this.getSource(userId, sourceId);
+    }
     async reindex(userId, sourceId) {
         const source = await this.prisma.profile_sources.findFirst({
             where: { id: sourceId, user_id: userId },
@@ -104,7 +134,7 @@ let ProfileIngestService = class ProfileIngestService {
         });
         if (!source)
             throw new common_1.NotFoundException('Source not found');
-        return { source: this.toPublic(source) };
+        return { source: this.toPublic(source, { includeContent: true }) };
     }
     async deleteSource(userId, id) {
         const found = await this.prisma.profile_sources.findFirst({
@@ -116,7 +146,7 @@ let ProfileIngestService = class ProfileIngestService {
         await this.prisma.profile_sources.delete({ where: { id } });
         return { success: true };
     }
-    toPublic(s) {
+    toPublic(s, opts = {}) {
         return {
             id: s.id,
             sourceType: s.source_type,
@@ -126,6 +156,7 @@ let ProfileIngestService = class ProfileIngestService {
             errorMessage: s.error_message,
             createdAt: s.created_at,
             updatedAt: s.updated_at,
+            ...(opts.includeContent ? { content: s.content ?? '' } : {}),
         };
     }
 };

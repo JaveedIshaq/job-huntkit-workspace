@@ -1,5 +1,5 @@
 import type * as runtime from "@prisma/client/runtime/client";
-import type * as Prisma from "../internal/prismaNamespace";
+import type * as Prisma from "../internal/prismaNamespace.js";
 export type jobsModel = runtime.Types.Result.DefaultSelection<Prisma.$jobsPayload>;
 export type AggregateJobs = {
     _count: JobsCountAggregateOutputType | null;

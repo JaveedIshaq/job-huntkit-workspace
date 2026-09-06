@@ -12,11 +12,95 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.JobsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
+const openai_chat_service_1 = require("../analyze/openai-chat.service");
+const parse_job_page_constants_1 = require("./parse-job-page.constants");
 const shared_1 = require("@huntkit/shared");
+const PAGE_TEXT_MAX = 60_000;
 let JobsService = class JobsService {
     prisma;
-    constructor(prisma) {
+    chat;
+    constructor(prisma, chat) {
         this.prisma = prisma;
+        this.chat = chat;
+    }
+    async parsePage(userId, dto) {
+        const pageText = dto.pageText.trim().slice(0, PAGE_TEXT_MAX);
+        if (pageText.length < 40) {
+            throw new common_1.BadRequestException('Paste looks too short. Copy the full job page (Ctrl+A / Ctrl+C).');
+        }
+        const startedAt = Date.now();
+        let model = 'gpt-4o-mini';
+        let usage = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
+        try {
+            const result = await this.chat.completeJson(parse_job_page_constants_1.PARSE_JOB_PAGE_SYSTEM_PROMPT, `PASTED JOB PAGE TEXT:\n${pageText}`);
+            model = result.model;
+            usage = result.usage;
+            const fields = this.parseExtractedFields(result.content);
+            await this.prisma.ai_runs.create({
+                data: {
+                    user_id: userId,
+                    run_type: 'job_analyze',
+                    model,
+                    prompt_tokens: usage.promptTokens,
+                    completion_tokens: usage.completionTokens,
+                    total_tokens: usage.totalTokens,
+                    latency_ms: Date.now() - startedAt,
+                    status: 'success',
+                    input_preview: pageText.slice(0, 500),
+                    output_preview: JSON.stringify(fields).slice(0, 500),
+                    retrieved_chunk_ids: [],
+                    metadata: { kind: 'parse_job_page' },
+                },
+            });
+            return { fields };
+        }
+        catch (err) {
+            await this.prisma.ai_runs.create({
+                data: {
+                    user_id: userId,
+                    run_type: 'job_analyze',
+                    model,
+                    prompt_tokens: usage.promptTokens,
+                    completion_tokens: usage.completionTokens,
+                    total_tokens: usage.totalTokens,
+                    latency_ms: Date.now() - startedAt,
+                    status: 'failed',
+                    error_message: String(err),
+                    input_preview: pageText.slice(0, 500),
+                    retrieved_chunk_ids: [],
+                    metadata: { kind: 'parse_job_page' },
+                },
+            });
+            if (err instanceof common_1.BadRequestException ||
+                err instanceof common_1.InternalServerErrorException) {
+                throw err;
+            }
+            throw new common_1.InternalServerErrorException(`Failed to extract job fields: ${String(err)}`);
+        }
+    }
+    parseExtractedFields(raw) {
+        let parsed;
+        try {
+            parsed = JSON.parse(raw);
+        }
+        catch {
+            throw new common_1.InternalServerErrorException('Model returned invalid JSON');
+        }
+        const company = String(parsed.company ?? '').trim();
+        const roleTitle = String(parsed.roleTitle ?? '').trim();
+        const jdText = String(parsed.jdText ?? '').trim();
+        const locationRaw = parsed.location;
+        const location = locationRaw == null || String(locationRaw).trim() === ''
+            ? null
+            : String(locationRaw).trim();
+        const urlRaw = parsed.jobUrl;
+        const jobUrl = typeof urlRaw === 'string' && /^https?:\/\//i.test(urlRaw.trim())
+            ? urlRaw.trim()
+            : null;
+        if (!jdText) {
+            throw new common_1.BadRequestException('Could not extract a job description from that paste. Try copying the page again.');
+        }
+        return { company, roleTitle, location, jobUrl, jdText };
     }
     async create(userId, dto) {
         const job = await this.prisma.jobs.create({
@@ -81,13 +165,19 @@ let JobsService = class JobsService {
         const job = await this.prisma.jobs.update({
             where: { id },
             data: {
-                company: dto.company,
-                role_title: dto.roleTitle,
-                jd_text: dto.jdText,
-                job_url: dto.jobUrl,
-                location: dto.location,
-                notes: dto.notes,
-                status: dto.status,
+                ...(dto.company !== undefined ? { company: dto.company } : {}),
+                ...(dto.roleTitle !== undefined ? { role_title: dto.roleTitle } : {}),
+                ...(dto.jdText !== undefined ? { jd_text: dto.jdText } : {}),
+                ...(dto.jobUrl !== undefined
+                    ? { job_url: dto.jobUrl === '' ? null : dto.jobUrl }
+                    : {}),
+                ...(dto.location !== undefined
+                    ? { location: dto.location === '' ? null : dto.location }
+                    : {}),
+                ...(dto.notes !== undefined
+                    ? { notes: dto.notes === '' ? null : dto.notes }
+                    : {}),
+                ...(dto.status !== undefined ? { status: dto.status } : {}),
                 applied_at: dto.status === shared_1.JobStatus.APPLIED ? new Date() : undefined,
                 updated_at: new Date(),
             },
@@ -123,6 +213,12 @@ let JobsService = class JobsService {
         };
     }
     toPublicAnalysis(a) {
+        const eligibility = a.eligibility &&
+            typeof a.eligibility === 'object' &&
+            !Array.isArray(a.eligibility) &&
+            Object.keys(a.eligibility).length > 0
+            ? a.eligibility
+            : undefined;
         return {
             analysisId: a.id,
             runId: a.ai_run_id,
@@ -132,6 +228,7 @@ let JobsService = class JobsService {
             applicationBullets: a.application_bullets ?? [],
             interviewQuestions: a.interview_questions ?? [],
             citations: a.citations ?? [],
+            ...(eligibility ? { eligibility } : {}),
             overallMatchScore: a.overall_match_score ?? 0,
             createdAt: a.created_at,
         };
@@ -140,6 +237,7 @@ let JobsService = class JobsService {
 exports.JobsService = JobsService;
 exports.JobsService = JobsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        openai_chat_service_1.OpenAiChatService])
 ], JobsService);
 //# sourceMappingURL=jobs.service.js.map

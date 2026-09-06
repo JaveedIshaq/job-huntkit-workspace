@@ -19,6 +19,7 @@ const current_user_decorator_1 = require("../shared/decorators/current-user.deco
 const profile_ingest_service_1 = require("./profile-ingest.service");
 const profile_retrieval_service_1 = require("./profile-retrieval.service");
 const create_source_dto_1 = require("./dto/create-source.dto");
+const update_source_dto_1 = require("./dto/update-source.dto");
 let ProfileController = class ProfileController {
     ingest;
     retrieval;
@@ -34,6 +35,9 @@ let ProfileController = class ProfileController {
     }
     getOne(user, id) {
         return this.ingest.getSource(user.id, id);
+    }
+    update(user, id, dto) {
+        return this.ingest.updateSource(user.id, id, dto);
     }
     remove(user, id) {
         return this.ingest.deleteSource(user.id, id);
@@ -69,6 +73,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], ProfileController.prototype, "getOne", null);
+__decorate([
+    (0, common_1.Patch)('sources/:id'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, update_source_dto_1.UpdateSourceDto]),
+    __metadata("design:returntype", void 0)
+], ProfileController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)('sources/:id'),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),

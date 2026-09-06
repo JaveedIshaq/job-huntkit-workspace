@@ -1,5 +1,5 @@
 import type * as runtime from "@prisma/client/runtime/client";
-import type * as Prisma from "../internal/prismaNamespace";
+import type * as Prisma from "../internal/prismaNamespace.js";
 export type ai_runsModel = runtime.Types.Result.DefaultSelection<Prisma.$ai_runsPayload>;
 export type AggregateAi_runs = {
     _count: Ai_runsCountAggregateOutputType | null;

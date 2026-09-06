@@ -39,18 +39,19 @@ __decorate([
 ], UpdateJobDto.prototype, "jdText", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateIf)((_, v) => v != null && v !== ''),
     (0, class_validator_1.IsUrl)(),
-    __metadata("design:type", String)
+    __metadata("design:type", Object)
 ], UpdateJobDto.prototype, "jobUrl", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
+    __metadata("design:type", Object)
 ], UpdateJobDto.prototype, "location", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
+    __metadata("design:type", Object)
 ], UpdateJobDto.prototype, "notes", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),

@@ -19,6 +19,7 @@ const jwt_auth_guard_1 = require("../shared/guards/jwt-auth.guard");
 const current_user_decorator_1 = require("../shared/decorators/current-user.decorator");
 const create_job_dto_1 = require("./dto/create-job.dto");
 const update_job_dto_1 = require("./dto/update-job.dto");
+const parse_job_page_dto_1 = require("./dto/parse-job-page.dto");
 let JobsController = class JobsController {
     jobsService;
     constructor(jobsService) {
@@ -26,6 +27,9 @@ let JobsController = class JobsController {
     }
     create(user, dto) {
         return this.jobsService.create(user.id, dto);
+    }
+    parsePage(user, dto) {
+        return this.jobsService.parsePage(user.id, dto);
     }
     findAll(user, status) {
         return this.jobsService.findAll(user.id, status);
@@ -49,6 +53,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, create_job_dto_1.CreateJobDto]),
     __metadata("design:returntype", void 0)
 ], JobsController.prototype, "create", null);
+__decorate([
+    (0, common_1.Post)('parse-page'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, parse_job_page_dto_1.ParseJobPageDto]),
+    __metadata("design:returntype", void 0)
+], JobsController.prototype, "parsePage", null);
 __decorate([
     (0, common_1.Get)(),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),

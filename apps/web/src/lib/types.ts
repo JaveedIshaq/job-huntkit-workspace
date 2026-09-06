@@ -35,6 +35,7 @@ export type LatestAnalysis = {
   applicationBullets: Bullet[];
   interviewQuestions: Question[];
   citations: Citation[];
+  eligibility?: Eligibility;
   overallMatchScore: number;
   createdAt: string;
 } | null;
@@ -48,6 +49,8 @@ export type Source = {
   errorMessage: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Present on GET /profile/sources/:id only (not on list). */
+  content?: string;
 };
 
 export type Strength = { text: string; chunkId?: string };
@@ -65,6 +68,19 @@ export type Citation = {
   score: number;
 };
 
+export type Eligibility = {
+  verdict: "apply" | "apply_low_priority" | "skip" | string;
+  confidence: "high" | "medium" | "low" | string;
+  remoteScope: string;
+  employmentType: string;
+  workAuthRisk: string;
+  languageRisk: string;
+  payVsFloor: string;
+  roleFitNote: string;
+  reasons: string[];
+  summary: string;
+};
+
 export type AnalysisResult = {
   analysisId: string | null;
   runId: string;
@@ -77,6 +93,7 @@ export type AnalysisResult = {
   applicationBullets?: Bullet[];
   interviewQuestions?: Question[];
   citations?: Citation[];
+  eligibility?: Eligibility;
   overallMatchScore?: number;
   usage?: {
     promptTokens: number;

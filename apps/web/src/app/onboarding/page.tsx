@@ -10,13 +10,13 @@ export default function OnboardingPage() {
   const { loading } = useRequireAuth();
   const router = useRouter();
 
-  if (loading) return <p className="text-foreground/60">Loading…</p>;
+  if (loading) return <p className="text-muted-foreground">Loading…</p>;
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-semibold">Build your profile</h1>
-        <p className="mt-1 text-sm text-foreground/60">
+        <p className="mt-1 text-sm text-muted-foreground">
           Add your resume and a couple of project write-ups. HuntKit uses these
           to ground every analysis. Add as many as you like, then continue.
         </p>

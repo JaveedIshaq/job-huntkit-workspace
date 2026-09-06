@@ -20,7 +20,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-xl border border-black/10 bg-white/60 p-5 shadow-sm dark:border-white/10 dark:bg-white/5",
+        "rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm",
         className,
       )}
     >
@@ -40,17 +40,17 @@ export function Button({
 }: ButtonProps) {
   const styles = {
     primary:
-      "bg-foreground text-background hover:opacity-90 disabled:opacity-50",
+      "bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50",
     secondary:
-      "border border-black/15 hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10 disabled:opacity-50",
-    ghost: "hover:bg-black/5 dark:hover:bg-white/10 disabled:opacity-50",
+      "border border-border bg-card text-foreground hover:bg-muted disabled:opacity-50",
+    ghost: "text-foreground hover:bg-muted disabled:opacity-50",
     danger:
-      "border border-red-500/40 text-red-600 hover:bg-red-500/10 dark:text-red-400 disabled:opacity-50",
+      "border border-danger/40 bg-danger-bg text-danger-fg hover:opacity-90 disabled:opacity-50",
   }[variant];
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed",
+        "inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition duration-200 disabled:cursor-not-allowed",
         styles,
         className,
       )}
@@ -64,7 +64,7 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
     <input
       {...props}
       className={cn(
-        "w-full rounded-lg border border-black/15 bg-transparent px-3 py-2 text-sm outline-none focus:border-foreground/60 dark:border-white/20",
+        "w-full rounded-lg border border-border bg-card px-3 py-2 text-base text-foreground outline-none placeholder:text-muted-foreground focus:border-ring sm:text-sm",
         props.className,
       )}
     />
@@ -76,7 +76,7 @@ export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
     <textarea
       {...props}
       className={cn(
-        "w-full rounded-lg border border-black/15 bg-transparent px-3 py-2 text-sm outline-none focus:border-foreground/60 dark:border-white/20",
+        "w-full rounded-lg border border-border bg-card px-3 py-2 text-base text-foreground outline-none placeholder:text-muted-foreground focus:border-ring sm:text-sm",
         props.className,
       )}
     />
@@ -88,7 +88,7 @@ export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
     <select
       {...props}
       className={cn(
-        "w-full rounded-lg border border-black/15 bg-transparent px-3 py-2 text-sm outline-none focus:border-foreground/60 dark:border-white/20",
+        "w-full rounded-lg border border-border bg-card px-3 py-2 text-base text-foreground outline-none focus:border-ring sm:text-sm",
         props.className,
       )}
     />
@@ -104,7 +104,7 @@ export function Field({
 }) {
   return (
     <label className="flex flex-col gap-1.5 text-sm">
-      <span className="font-medium">{label}</span>
+      <span className="font-medium text-foreground">{label}</span>
       {children}
     </label>
   );
@@ -113,24 +113,27 @@ export function Field({
 export function Badge({
   children,
   tone = "neutral",
+  className,
 }: {
   children: ReactNode;
   tone?: "neutral" | "green" | "amber" | "red" | "blue";
+  className?: string;
 }) {
   const tones = {
-    neutral: "bg-black/10 text-foreground/70 dark:bg-white/10",
-    green: "bg-green-500/15 text-green-700 dark:text-green-400",
-    amber: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
-    red: "bg-red-500/15 text-red-700 dark:text-red-400",
-    blue: "bg-blue-500/15 text-blue-700 dark:text-blue-400",
+    neutral: "bg-muted text-muted-foreground",
+    green: "bg-success-bg text-success-fg",
+    amber: "bg-warning-bg text-warning-fg",
+    red: "bg-danger-bg text-danger-fg",
+    blue: "bg-info-bg text-info-fg",
   }[tone];
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
-        tone,
+        "inline-flex max-w-full items-center truncate whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium",
         tones,
+        className,
       )}
+      title={typeof children === "string" ? children : undefined}
     >
       {children}
     </span>
@@ -140,7 +143,7 @@ export function Badge({
 export function ErrorText({ children }: { children: ReactNode }) {
   if (!children) return null;
   return (
-    <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-600 dark:text-red-400">
+    <p className="rounded-lg bg-danger-bg px-3 py-2 text-sm text-danger-fg">
       {children}
     </p>
   );

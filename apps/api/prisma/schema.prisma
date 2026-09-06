@@ -45,6 +45,7 @@ model job_analyses {
   application_bullets Json     @default("[]")
   interview_questions Json     @default("[]")
   citations           Json     @default("[]")
+  eligibility         Json     @default("{}")
   overall_match_score Int?
   created_at          DateTime @default(now()) @db.Timestamptz(6)
   ai_runs             ai_runs? @relation(fields: [ai_run_id], references: [id], onDelete: NoAction, onUpdate: NoAction)

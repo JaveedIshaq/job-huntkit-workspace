@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { useRequireAuth } from "@/lib/auth";
 import { apiFetch, ApiError } from "@/lib/api";
 import type { Source } from "@/lib/types";
@@ -66,7 +67,7 @@ export default function ProfilePage() {
     }
   }
 
-  if (authLoading) return <p className="text-foreground/60">Loading…</p>;
+  if (authLoading) return <p className="text-muted-foreground">Loading…</p>;
 
   return (
     <div className="flex flex-col gap-6">
@@ -80,9 +81,9 @@ export default function ProfilePage() {
       <ErrorText>{error}</ErrorText>
 
       {loading ? (
-        <p className="text-foreground/60">Loading sources…</p>
+        <p className="text-muted-foreground">Loading sources…</p>
       ) : sources.length === 0 ? (
-        <p className="text-foreground/60">
+        <p className="text-muted-foreground">
           No sources yet. Add your resume above.
         </p>
       ) : (
@@ -96,12 +97,17 @@ export default function ProfilePage() {
                     <Badge tone="blue">{s.sourceType}</Badge>
                     <Badge tone={statusTone(s.status)}>{s.status}</Badge>
                   </div>
-                  <p className="mt-1 text-sm text-foreground/60">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     {s.chunkCount} chunk{s.chunkCount === 1 ? "" : "s"}
                     {s.errorMessage ? ` · ${s.errorMessage}` : ""}
                   </p>
                 </div>
                 <div className="flex gap-2">
+                  <Link href={`/profile/${s.id}`}>
+                    <Button variant="secondary" type="button">
+                      View
+                    </Button>
+                  </Link>
                   <Button
                     variant="secondary"
                     disabled={busyId === s.id}

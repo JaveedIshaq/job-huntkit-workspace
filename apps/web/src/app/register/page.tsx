@@ -40,7 +40,7 @@ export default function RegisterPage() {
         </div>
         <Card>
           <h1 className="mb-1 text-xl font-semibold">Sign-up is closed</h1>
-          <p className="mb-5 text-sm text-foreground/60">
+          <p className="mb-5 text-sm text-muted-foreground">
             HuntKit is invite-only right now. If you have an account, log in
             below.
           </p>
@@ -59,7 +59,7 @@ export default function RegisterPage() {
       </div>
       <Card>
         <h1 className="mb-1 text-xl font-semibold">Create your account</h1>
-        <p className="mb-5 text-sm text-foreground/60">
+        <p className="mb-5 text-sm text-muted-foreground">
           Start grounding your job hunt in real experience.
         </p>
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
@@ -94,7 +94,7 @@ export default function RegisterPage() {
             {loading ? "Creating…" : "Create account"}
           </Button>
         </form>
-        <p className="mt-4 text-sm text-foreground/60">
+        <p className="mt-4 text-sm text-muted-foreground">
           Already have an account?{" "}
           <Link href="/login" className="underline">
             Log in

@@ -40,9 +40,9 @@ export function Logo({
 }) {
   return (
     <span className={cn("inline-flex items-center gap-2 font-semibold", className)}>
-      <LogoMark size={size} className="text-indigo-500" />
+      <LogoMark size={size} className="text-primary" />
       <span>
-        Hunt<span className="opacity-60">Kit</span>
+        Hunt<span className="text-muted-foreground">Kit</span>
       </span>
     </span>
   );

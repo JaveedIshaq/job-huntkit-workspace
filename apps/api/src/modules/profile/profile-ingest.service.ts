@@ -3,6 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { OpenAiEmbeddingService } from './openai-embedding.service';
 import { CreateSourceDto } from './dto/create-source.dto';
+import { UpdateSourceDto } from './dto/update-source.dto';
 import { chunkText } from './utils/chunk-text';
 
 @Injectable()
@@ -25,6 +26,41 @@ export class ProfileIngestService {
 
     await this.indexSource(userId, source.id, dto.content);
     return this.getSource(userId, source.id);
+  }
+
+  async updateSource(userId: string, sourceId: string, dto: UpdateSourceDto) {
+    const existing = await this.prisma.profile_sources.findFirst({
+      where: { id: sourceId, user_id: userId },
+    });
+    if (!existing) throw new NotFoundException('Source not found');
+
+    const nextTitle = dto.title ?? existing.title;
+    const nextType = dto.sourceType ?? existing.source_type;
+    const nextContent = dto.content ?? existing.content;
+    const contentChanged = nextContent !== existing.content;
+
+    await this.prisma.profile_sources.update({
+      where: { id: sourceId },
+      data: {
+        title: nextTitle,
+        source_type: nextType,
+        content: nextContent,
+        updated_at: new Date(),
+        // Re-embed when the text changes so retrieval stays accurate.
+        ...(contentChanged
+          ? { status: 'processing', chunk_count: 0, error_message: null }
+          : {}),
+      },
+    });
+
+    if (contentChanged) {
+      await this.prisma.profile_chunks.deleteMany({
+        where: { profile_source_id: sourceId, user_id: userId },
+      });
+      await this.indexSource(userId, sourceId, nextContent);
+    }
+
+    return this.getSource(userId, sourceId);
   }
 
   async reindex(userId: string, sourceId: string) {
@@ -105,7 +141,8 @@ export class ProfileIngestService {
       where: { id, user_id: userId },
     });
     if (!source) throw new NotFoundException('Source not found');
-    return { source: this.toPublic(source) };
+    // Detail view needs the stored text; list responses stay light.
+    return { source: this.toPublic(source, { includeContent: true }) };
   }
 
   async deleteSource(userId: string, id: string) {
@@ -119,16 +156,20 @@ export class ProfileIngestService {
     return { success: true };
   }
 
-  private toPublic(s: {
-    id: string;
-    source_type: string;
-    title: string;
-    status: string;
-    chunk_count: number;
-    error_message: string | null;
-    created_at: Date;
-    updated_at: Date;
-  }) {
+  private toPublic(
+    s: {
+      id: string;
+      source_type: string;
+      title: string;
+      content?: string;
+      status: string;
+      chunk_count: number;
+      error_message: string | null;
+      created_at: Date;
+      updated_at: Date;
+    },
+    opts: { includeContent?: boolean } = {},
+  ) {
     return {
       id: s.id,
       sourceType: s.source_type,
@@ -138,6 +179,7 @@ export class ProfileIngestService {
       errorMessage: s.error_message,
       createdAt: s.created_at,
       updatedAt: s.updated_at,
+      ...(opts.includeContent ? { content: s.content ?? '' } : {}),
     };
   }
 }

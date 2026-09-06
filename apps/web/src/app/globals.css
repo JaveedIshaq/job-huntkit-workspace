@@ -1,26 +1,107 @@
 @import "tailwindcss";
 
+/* Class-based dark mode (theme toggle), not only prefers-color-scheme */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light — high contrast for long reading sessions */
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --muted: #e2e8f0;
+  --muted-foreground: #475569;
+  --border: #cbd5e1;
+  --primary: #0f766e;
+  --primary-foreground: #f0fdfa;
+  --accent: #059669;
+  --accent-foreground: #ecfdf5;
+  --danger: #b91c1c;
+  --danger-foreground: #fef2f2;
+  --ring: #0d9488;
+  --success-bg: #dcfce7;
+  --success-fg: #166534;
+  --warning-bg: #fef3c7;
+  --warning-fg: #92400e;
+  --danger-bg: #fee2e2;
+  --danger-fg: #991b1b;
+  --info-bg: #e0f2fe;
+  --info-fg: #075985;
+}
+
+.dark {
+  /* Dark — slate surfaces, softer than pure black / pure white */
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --card: #1e293b;
+  --card-foreground: #f1f5f9;
+  --muted: #334155;
+  --muted-foreground: #cbd5e1;
+  --border: #475569;
+  --primary: #2dd4bf;
+  --primary-foreground: #042f2e;
+  --accent: #34d399;
+  --accent-foreground: #022c22;
+  --danger: #f87171;
+  --danger-foreground: #450a0a;
+  --ring: #2dd4bf;
+  --success-bg: #14532d;
+  --success-fg: #bbf7d0;
+  --warning-bg: #78350f;
+  --warning-fg: #fde68a;
+  --danger-bg: #7f1d1d;
+  --danger-fg: #fecaca;
+  --info-bg: #0c4a6e;
+  --info-fg: #bae6fd;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-ring: var(--ring);
+  --color-success-bg: var(--success-bg);
+  --color-success-fg: var(--success-fg);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-fg: var(--warning-fg);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-fg: var(--danger-fg);
+  --color-info-bg: var(--info-bg);
+  --color-info-fg: var(--info-fg);
+  --font-sans: var(--font-jakarta);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* Focus visibility (a11y) */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

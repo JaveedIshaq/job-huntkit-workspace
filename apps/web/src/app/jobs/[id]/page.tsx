@@ -8,6 +8,7 @@ import {
   type FormEvent,
 } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useRequireAuth } from "@/lib/auth";
 import { apiFetch, ApiError } from "@/lib/api";
 import {
@@ -81,6 +82,7 @@ export default function JobDetailPage({
 }) {
   const { id } = use(params);
   const { loading: authLoading } = useRequireAuth();
+  const router = useRouter();
 
   const [job, setJob] = useState<Job | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
@@ -135,6 +137,17 @@ export default function JobDetailPage({
       await load();
     })();
   }, [authLoading, load]);
+
+  useEffect(() => {
+    const analyzeError = new URLSearchParams(window.location.search).get(
+      "analyzeError",
+    );
+    if (!analyzeError) return;
+    setError(
+      `Job saved, but analysis failed: ${analyzeError}. Click Analyze to retry.`,
+    );
+    router.replace(`/jobs/${id}`, { scroll: false });
+  }, [id, router]);
 
   function startEdit() {
     if (!job) return;
@@ -527,7 +540,7 @@ function AnalysisView({ analysis }: { analysis: AnalysisResult }) {
 
 function EligibilityCard({ eligibility }: { eligibility: Eligibility }) {
   return (
-    <Card className="border-l-4 border-l-primary">
+    <Card className="bg-muted/40">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">

@@ -37,7 +37,7 @@ export default function LoginPage() {
       </div>
       <Card>
         <h1 className="mb-1 text-xl font-semibold">Welcome back</h1>
-        <p className="mb-5 text-sm text-foreground/60">
+        <p className="mb-5 text-sm text-muted-foreground">
           Log in to your HuntKit account.
         </p>
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
@@ -64,7 +64,7 @@ export default function LoginPage() {
             {loading ? "Logging in…" : "Log in"}
           </Button>
         </form>
-        <p className="mt-4 text-sm text-foreground/60">
+        <p className="mt-4 text-sm text-muted-foreground">
           No account?{" "}
           <Link href="/register" className="underline">
             Sign up

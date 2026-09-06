@@ -29,13 +29,13 @@ export default function AdminRunsPage() {
       .finally(() => setLoading(false));
   }, [authLoading]);
 
-  if (authLoading) return <p className="text-foreground/60">Loading…</p>;
+  if (authLoading) return <p className="text-muted-foreground">Loading…</p>;
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-semibold">AI runs</h1>
-        <p className="mt-1 text-sm text-foreground/60">
+        <p className="mt-1 text-sm text-muted-foreground">
           Every model call, its tokens, latency, and outcome.
         </p>
       </div>
@@ -43,9 +43,9 @@ export default function AdminRunsPage() {
       <ErrorText>{error}</ErrorText>
 
       {loading ? (
-        <p className="text-foreground/60">Loading runs…</p>
+        <p className="text-muted-foreground">Loading runs…</p>
       ) : runs.length === 0 ? (
-        <p className="text-foreground/60">No AI runs yet.</p>
+        <p className="text-muted-foreground">No AI runs yet.</p>
       ) : (
         <div className="flex flex-col gap-3">
           {runs.map((run) => (
@@ -58,11 +58,11 @@ export default function AdminRunsPage() {
                     {run.model}
                   </span>
                 </div>
-                <div className="text-xs text-foreground/60">
+                <div className="text-xs text-muted-foreground">
                   {new Date(run.createdAt).toLocaleString()}
                 </div>
               </div>
-              <div className="mt-2 flex flex-wrap gap-4 text-xs text-foreground/60">
+              <div className="mt-2 flex flex-wrap gap-4 text-xs text-muted-foreground">
                 <span>{run.totalTokens ?? 0} tokens</span>
                 <span>{run.latencyMs != null ? `${run.latencyMs} ms` : "—"}</span>
               </div>

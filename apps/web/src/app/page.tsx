@@ -25,7 +25,7 @@ export default function Home() {
           Land the right role with your own{" "}
           <span className="opacity-60">AI job coach.</span>
         </h1>
-        <p className="max-w-2xl text-lg text-foreground/70">
+        <p className="max-w-2xl text-lg text-muted-foreground">
           HuntKit grounds every suggestion in your real experience. No generic
           advice — it cites the exact parts of your profile it used.
         </p>
@@ -51,7 +51,7 @@ export default function Home() {
         {STEPS.map((s) => (
           <Card key={s.title}>
             <h3 className="mb-2 font-semibold">{s.title}</h3>
-            <p className="text-sm text-foreground/70">{s.body}</p>
+            <p className="text-sm text-muted-foreground">{s.body}</p>
           </Card>
         ))}
       </section>

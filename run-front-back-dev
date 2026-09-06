@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# Start HuntKit web (:3000) + API (:3001).
+# Frees those ports if something else is listening, then runs `pnpm dev`.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$ROOT"
+
+PORTS=(3000 3001)
+MAX_ATTEMPTS=3
+WAIT_SECS=1
+
+pids_on_port() {
+  local port="$1"
+  # -t: PIDs only; -sTCP:LISTEN: listeners only (not outbound clients)
+  lsof -nP -iTCP:"$port" -sTCP:LISTEN -t 2>/dev/null || true
+}
+
+free_port() {
+  local port="$1"
+  local pids
+  pids="$(pids_on_port "$port")"
+  if [[ -z "$pids" ]]; then
+    echo "  port $port: free"
+    return 0
+  fi
+
+  echo "  port $port: in use by PID(s): $(echo "$pids" | tr '\n' ' ')"
+  # Prefer graceful stop first.
+  # shellcheck disable=SC2086
+  kill $pids 2>/dev/null || true
+  sleep "$WAIT_SECS"
+
+  pids="$(pids_on_port "$port")"
+  if [[ -n "$pids" ]]; then
+    echo "  port $port: still busy — force kill"
+    # shellcheck disable=SC2086
+    kill -9 $pids 2>/dev/null || true
+    sleep "$WAIT_SECS"
+  fi
+
+  if [[ -n "$(pids_on_port "$port")" ]]; then
+    echo "  port $port: ERROR — still in use after kill" >&2
+    return 1
+  fi
+  echo "  port $port: freed"
+}
+
+free_all_ports() {
+  local ok=0
+  echo "Checking ports ${PORTS[*]}…"
+  for port in "${PORTS[@]}"; do
+    free_port "$port" || ok=1
+  done
+  return "$ok"
+}
+
+echo "HuntKit local: web http://localhost:3000  ·  api http://localhost:3001"
+echo
+
+attempt=1
+while (( attempt <= MAX_ATTEMPTS )); do
+  if free_all_ports; then
+    break
+  fi
+  if (( attempt == MAX_ATTEMPTS )); then
+    echo "Could not free ports after $MAX_ATTEMPTS attempts." >&2
+    exit 1
+  fi
+  echo "Retry freeing ports ($attempt/$MAX_ATTEMPTS)…"
+  sleep "$WAIT_SECS"
+  (( attempt++ )) || true
+done
+
+echo
+echo "Starting pnpm dev…"
+exec pnpm dev

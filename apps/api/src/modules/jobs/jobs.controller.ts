@@ -15,6 +15,7 @@ import { CurrentUser } from '../shared/decorators/current-user.decorator';
 import type { AuthUser } from '../shared/types/auth-user.type';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
+import { ParseJobPageDto } from './dto/parse-job-page.dto';
 
 @Controller('jobs')
 @UseGuards(JwtAuthGuard)
@@ -24,6 +25,12 @@ export class JobsController {
   @Post()
   create(@CurrentUser() user: AuthUser, @Body() dto: CreateJobDto) {
     return this.jobsService.create(user.id, dto);
+  }
+
+  /** AI extract fields from a Ctrl+A page paste — must stay before :id routes. */
+  @Post('parse-page')
+  parsePage(@CurrentUser() user: AuthUser, @Body() dto: ParseJobPageDto) {
+    return this.jobsService.parsePage(user.id, dto);
   }
 
   @Get()

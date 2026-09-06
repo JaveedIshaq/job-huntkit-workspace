@@ -16,6 +16,14 @@ import {
   Textarea,
 } from "@/components/ui";
 
+export type ParsedJobFields = {
+  company: string;
+  roleTitle: string;
+  location: string | null;
+  jobUrl: string | null;
+  jdText: string;
+};
+
 export default function JobsPage() {
   const { loading: authLoading } = useRequireAuth();
   const [items, setItems] = useState<Job[]>([]);
@@ -43,7 +51,7 @@ export default function JobsPage() {
     })();
   }, [authLoading, load]);
 
-  if (authLoading) return <p className="text-foreground/60">Loading…</p>;
+  if (authLoading) return <p className="text-muted-foreground">Loading…</p>;
 
   return (
     <div className="flex flex-col gap-6">
@@ -79,20 +87,20 @@ export default function JobsPage() {
       <ErrorText>{error}</ErrorText>
 
       {loading ? (
-        <p className="text-foreground/60">Loading jobs…</p>
+        <p className="text-muted-foreground">Loading jobs…</p>
       ) : items.length === 0 ? (
-        <p className="text-foreground/60">
+        <p className="text-muted-foreground">
           No jobs yet. Add one to start analyzing.
         </p>
       ) : (
         <div className="flex flex-col gap-3">
           {items.map((job) => (
-            <Link key={job.id} href={`/jobs/${job.id}`}>
+            <Link key={job.id} href={`/jobs/${job.id}`} className="cursor-pointer">
               <Card className="transition hover:border-foreground/30">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <div className="font-medium">{job.roleTitle}</div>
-                    <div className="text-sm text-foreground/60">
+                    <div className="text-sm text-muted-foreground">
                       {job.company}
                       {job.location ? ` · ${job.location}` : ""}
                     </div>
@@ -117,6 +125,16 @@ function NewJobForm({ onCreated }: { onCreated: (job: Job) => void }) {
   const [jdText, setJdText] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [pasteOpen, setPasteOpen] = useState(false);
+
+  function applyParsed(fields: ParsedJobFields) {
+    if (fields.company) setCompany(fields.company);
+    if (fields.roleTitle) setRoleTitle(fields.roleTitle);
+    if (fields.location) setLocation(fields.location);
+    if (fields.jobUrl) setJobUrl(fields.jobUrl);
+    if (fields.jdText) setJdText(fields.jdText);
+    setPasteOpen(false);
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -143,59 +161,178 @@ function NewJobForm({ onCreated }: { onCreated: (job: Job) => void }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Company">
+    <>
+      <form onSubmit={onSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-sm text-muted-foreground">
+            Fill manually, or paste a full job page and let AI extract fields.
+          </p>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => setPasteOpen(true)}
+          >
+            Paste the job page
+          </Button>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Company">
+            <Input
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              required
+            />
+          </Field>
+          <Field label="Role title">
+            <Input
+              value={roleTitle}
+              onChange={(e) => setRoleTitle(e.target.value)}
+              required
+            />
+          </Field>
+          <Field label="Location (optional)">
+            <Input
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
+          </Field>
+          <Field label="Status">
+            <Select value={status} onChange={(e) => setStatus(e.target.value)}>
+              {JOB_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        </div>
+        <Field label="Job URL (optional)">
           <Input
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
+            type="url"
+            value={jobUrl}
+            onChange={(e) => setJobUrl(e.target.value)}
+            placeholder="https://…"
+          />
+        </Field>
+        <Field label="Job description">
+          <Textarea
+            value={jdText}
+            onChange={(e) => setJdText(e.target.value)}
+            rows={8}
+            placeholder="Paste the full job description here…"
             required
           />
         </Field>
-        <Field label="Role title">
-          <Input
-            value={roleTitle}
-            onChange={(e) => setRoleTitle(e.target.value)}
-            required
-          />
-        </Field>
-        <Field label="Location (optional)">
-          <Input
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-          />
-        </Field>
-        <Field label="Status">
-          <Select value={status} onChange={(e) => setStatus(e.target.value)}>
-            {JOB_STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </Select>
-        </Field>
-      </div>
-      <Field label="Job URL (optional)">
-        <Input
-          type="url"
-          value={jobUrl}
-          onChange={(e) => setJobUrl(e.target.value)}
-          placeholder="https://…"
+        <ErrorText>{error}</ErrorText>
+        <Button type="submit" disabled={loading} className="self-start">
+          {loading ? "Saving…" : "Save job"}
+        </Button>
+      </form>
+
+      {pasteOpen && (
+        <PasteJobPageDialog
+          onClose={() => setPasteOpen(false)}
+          onParsed={applyParsed}
         />
-      </Field>
-      <Field label="Job description">
+      )}
+    </>
+  );
+}
+
+function PasteJobPageDialog({
+  onClose,
+  onParsed,
+}: {
+  onClose: () => void;
+  onParsed: (fields: ParsedJobFields) => void;
+}) {
+  const [pageText, setPageText] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function extract() {
+    setError("");
+    setLoading(true);
+    try {
+      const { fields } = await apiFetch<{ fields: ParsedJobFields }>(
+        "/jobs/parse-page",
+        {
+          method: "POST",
+          body: JSON.stringify({ pageText }),
+        },
+      );
+      onParsed(fields);
+    } catch (err) {
+      setError(
+        err instanceof ApiError ? err.message : "Failed to extract job fields",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="paste-job-page-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !loading) onClose();
+      }}
+    >
+      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col gap-4 overflow-hidden rounded-xl border border-border bg-card p-5 text-card-foreground shadow-lg">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 id="paste-job-page-title" className="text-lg font-semibold">
+              Paste the job page
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              On the job posting: select all (Ctrl/Cmd+A), copy, then paste here.
+              AI will fill company, role, location, URL, and description.
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            disabled={loading}
+            onClick={onClose}
+          >
+            Close
+          </Button>
+        </div>
+
         <Textarea
-          value={jdText}
-          onChange={(e) => setJdText(e.target.value)}
-          rows={8}
-          placeholder="Paste the full job description here…"
-          required
+          value={pageText}
+          onChange={(e) => setPageText(e.target.value)}
+          rows={14}
+          placeholder="Paste the full page text here…"
+          disabled={loading}
+          className="min-h-[40vh] font-mono text-xs"
+          autoFocus
         />
-      </Field>
-      <ErrorText>{error}</ErrorText>
-      <Button type="submit" disabled={loading} className="self-start">
-        {loading ? "Saving…" : "Save job"}
-      </Button>
-    </form>
+
+        <ErrorText>{error}</ErrorText>
+
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            disabled={loading || pageText.trim().length < 40}
+            onClick={() => void extract()}
+          >
+            {loading ? "Extracting…" : "Extract & fill form"}
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={loading}
+            onClick={onClose}
+          >
+            Cancel
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }

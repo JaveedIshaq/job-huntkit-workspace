@@ -29,7 +29,7 @@ export default function DashboardPage() {
       );
   }, [authLoading]);
 
-  if (authLoading) return <p className="text-foreground/60">Loading…</p>;
+  if (authLoading) return <p className="text-muted-foreground">Loading…</p>;
 
   return (
     <div className="flex flex-col gap-6">
@@ -37,7 +37,7 @@ export default function DashboardPage() {
         <h1 className="text-2xl font-semibold">
           Welcome{user?.displayName ? `, ${user.displayName}` : ""}
         </h1>
-        <p className="mt-1 text-sm text-foreground/60">
+        <p className="mt-1 text-sm text-muted-foreground">
           Your job hunt at a glance.
         </p>
       </div>
@@ -50,7 +50,7 @@ export default function DashboardPage() {
             <div className="text-3xl font-semibold">
               {stats ? stats[c.key].toLocaleString() : "—"}
             </div>
-            <div className="mt-1 text-sm text-foreground/60">{c.label}</div>
+            <div className="mt-1 text-sm text-muted-foreground">{c.label}</div>
           </Card>
         ))}
       </div>

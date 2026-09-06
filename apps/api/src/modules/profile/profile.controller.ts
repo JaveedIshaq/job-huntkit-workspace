@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -15,6 +16,7 @@ import type { AuthUser } from '../shared/types/auth-user.type';
 import { ProfileIngestService } from './profile-ingest.service';
 import { ProfileRetrievalService } from './profile-retrieval.service';
 import { CreateSourceDto } from './dto/create-source.dto';
+import { UpdateSourceDto } from './dto/update-source.dto';
 
 @Controller('profile')
 @UseGuards(JwtAuthGuard)
@@ -37,6 +39,15 @@ export class ProfileController {
   @Get('sources/:id')
   getOne(@CurrentUser() user: AuthUser, @Param('id') id: string) {
     return this.ingest.getSource(user.id, id);
+  }
+
+  @Patch('sources/:id')
+  update(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Body() dto: UpdateSourceDto,
+  ) {
+    return this.ingest.updateSource(user.id, id, dto);
   }
 
   @Delete('sources/:id')

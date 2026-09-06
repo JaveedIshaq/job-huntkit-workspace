@@ -8,5 +8,6 @@ import { ProfileModule } from '../profile/profile.module';
   imports: [ProfileModule],
   controllers: [AnalyzeController],
   providers: [AnalyzeService, OpenAiChatService],
+  exports: [OpenAiChatService],
 })
 export class AnalyzeModule {}

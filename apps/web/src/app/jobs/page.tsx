@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useRequireAuth } from "@/lib/auth";
 import { apiFetch, ApiError } from "@/lib/api";
 import { JOB_STATUSES, type Job, type JobsList } from "@/lib/types";
@@ -92,10 +93,12 @@ export default function JobsPage() {
       {showForm && (
         <Card>
           <NewJobForm
-            onCreated={(job) => {
+            onCreated={(job, options) => {
               setItems((prev) => [job, ...prev]);
-              setShowForm(false);
-              load();
+              if (options?.keepOpen !== true) {
+                setShowForm(false);
+              }
+              void load();
             }}
           />
         </Card>
@@ -221,7 +224,12 @@ function JobListRow({
   );
 }
 
-function NewJobForm({ onCreated }: { onCreated: (job: Job) => void }) {
+function NewJobForm({
+  onCreated,
+}: {
+  onCreated: (job: Job, options?: { keepOpen?: boolean }) => void;
+}) {
+  const router = useRouter();
   const [company, setCompany] = useState("");
   const [roleTitle, setRoleTitle] = useState("");
   const [location, setLocation] = useState("");
@@ -229,7 +237,7 @@ function NewJobForm({ onCreated }: { onCreated: (job: Job) => void }) {
   const [status, setStatus] = useState<string>(JOB_STATUSES[0]);
   const [jdText, setJdText] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [busy, setBusy] = useState<"save" | "analyze" | null>(null);
   const [pasteOpen, setPasteOpen] = useState(false);
 
   function applyParsed(fields: ParsedJobFields) {
@@ -245,34 +253,62 @@ function NewJobForm({ onCreated }: { onCreated: (job: Job) => void }) {
     setPasteOpen(false);
   }
 
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
+  async function createJob(): Promise<Job> {
+    const companyTrim = company.trim();
+    const { job } = await apiFetch<{ job: Job }>("/jobs", {
+      method: "POST",
+      body: JSON.stringify({
+        company: companyTrim,
+        roleTitle: composeRoleAtCompany(roleTitle, companyTrim),
+        jdText,
+        status,
+        location: location || undefined,
+        jobUrl: jobUrl || undefined,
+      }),
+    });
+    return job;
+  }
+
+  async function saveOnly(e?: FormEvent) {
+    e?.preventDefault();
     setError("");
-    setLoading(true);
+    setBusy("save");
     try {
-      const companyTrim = company.trim();
-      const { job } = await apiFetch<{ job: Job }>("/jobs", {
-        method: "POST",
-        body: JSON.stringify({
-          company: companyTrim,
-          roleTitle: composeRoleAtCompany(roleTitle, companyTrim),
-          jdText,
-          status,
-          location: location || undefined,
-          jobUrl: jobUrl || undefined,
-        }),
-      });
+      const job = await createJob();
       onCreated(job);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to create job");
     } finally {
-      setLoading(false);
+      setBusy(null);
+    }
+  }
+
+  async function saveAndAnalyze(e?: FormEvent) {
+    e?.preventDefault();
+    setError("");
+    setBusy("analyze");
+    try {
+      const job = await createJob();
+      onCreated(job, { keepOpen: true });
+      try {
+        await apiFetch(`/jobs/${job.id}/analyze`, { method: "POST" });
+        router.push(`/jobs/${job.id}`);
+      } catch (err) {
+        const message =
+          err instanceof ApiError ? err.message : "Analysis failed";
+        router.push(
+          `/jobs/${job.id}?analyzeError=${encodeURIComponent(message)}`,
+        );
+      }
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to create job");
+      setBusy(null);
     }
   }
 
   return (
     <>
-      <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <form onSubmit={saveAndAnalyze} className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm text-muted-foreground">
             Fill manually, or paste a full job page and let AI extract fields.
@@ -281,6 +317,7 @@ function NewJobForm({ onCreated }: { onCreated: (job: Job) => void }) {
             type="button"
             variant="secondary"
             onClick={() => setPasteOpen(true)}
+            disabled={busy !== null}
           >
             Paste the job page
           </Button>
@@ -292,6 +329,7 @@ function NewJobForm({ onCreated }: { onCreated: (job: Job) => void }) {
               value={company}
               onChange={(e) => setCompany(e.target.value)}
               required
+              disabled={busy !== null}
             />
           </Field>
           <Field label="Role title">
@@ -300,16 +338,22 @@ function NewJobForm({ onCreated }: { onCreated: (job: Job) => void }) {
               onChange={(e) => setRoleTitle(e.target.value)}
               placeholder="e.g. Flutter Developer — saved as Role at Company"
               required
+              disabled={busy !== null}
             />
           </Field>
           <Field label="Location (optional)">
             <Input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
+              disabled={busy !== null}
             />
           </Field>
           <Field label="Status">
-            <Select value={status} onChange={(e) => setStatus(e.target.value)}>
+            <Select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              disabled={busy !== null}
+            >
               {JOB_STATUSES.map((s) => (
                 <option key={s} value={s}>
                   {s}
@@ -324,6 +368,7 @@ function NewJobForm({ onCreated }: { onCreated: (job: Job) => void }) {
             value={jobUrl}
             onChange={(e) => setJobUrl(e.target.value)}
             placeholder="https://…"
+            disabled={busy !== null}
           />
         </Field>
         <Field label="Job description">
@@ -333,12 +378,29 @@ function NewJobForm({ onCreated }: { onCreated: (job: Job) => void }) {
             rows={8}
             placeholder="Paste the full job description here…"
             required
+            disabled={busy !== null}
           />
         </Field>
         <ErrorText>{error}</ErrorText>
-        <Button type="submit" disabled={loading} className="self-start">
-          {loading ? "Saving…" : "Save job"}
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={busy !== null}
+            onClick={() => void saveOnly()}
+          >
+            {busy === "save" ? "Saving…" : "Save"}
+          </Button>
+          <Button type="submit" disabled={busy !== null}>
+            {busy === "analyze" ? "Saving & analyzing…" : "Save & analyze"}
+          </Button>
+        </div>
+        {busy === "analyze" ? (
+          <p className="text-sm text-muted-foreground">
+            Saving the job, then running AI analysis. You’ll open the job
+            detail when it finishes…
+          </p>
+        ) : null}
       </form>
 
       {pasteOpen && (

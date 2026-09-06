@@ -211,6 +211,15 @@ export class JobsService {
   async update(userId: string, id: string, dto: UpdateJobDto) {
     await this.ensureOwned(userId, id);
 
+    // Stamp applied_at when marking applied; clear it when returning to saved.
+    // Other status moves (screening, interview, …) leave the applied date alone.
+    let appliedAt: Date | null | undefined = undefined;
+    if (dto.status === JobStatus.APPLIED) {
+      appliedAt = new Date();
+    } else if (dto.status === JobStatus.SAVED) {
+      appliedAt = null;
+    }
+
     const job = await this.prisma.jobs.update({
       where: { id },
       data: {
@@ -227,7 +236,7 @@ export class JobsService {
           ? { notes: dto.notes === '' ? null : dto.notes }
           : {}),
         ...(dto.status !== undefined ? { status: dto.status } : {}),
-        applied_at: dto.status === JobStatus.APPLIED ? new Date() : undefined,
+        ...(appliedAt !== undefined ? { applied_at: appliedAt } : {}),
         updated_at: new Date(),
       },
     });

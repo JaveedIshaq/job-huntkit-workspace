@@ -14,7 +14,9 @@ import {
   Input,
   Select,
   Textarea,
+  cn,
 } from "@/components/ui";
+import { JobStatus } from "@huntkit/shared";
 
 export type ParsedJobFields = {
   company: string;
@@ -23,6 +25,18 @@ export type ParsedJobFields = {
   jobUrl: string | null;
   jdText: string;
 };
+
+function formatJobDate(iso: string): string {
+  return new Date(iso).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function isAppliedJob(job: Job): boolean {
+  return job.status === JobStatus.APPLIED || Boolean(job.appliedAt);
+}
 
 export default function JobsPage() {
   const { loading: authLoading } = useRequireAuth();
@@ -95,24 +109,103 @@ export default function JobsPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {items.map((job) => (
-            <Link key={job.id} href={`/jobs/${job.id}`} className="cursor-pointer">
-              <Card className="transition hover:border-foreground/30">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <div className="font-medium">{job.roleTitle}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {job.company}
-                      {job.location ? ` · ${job.location}` : ""}
-                    </div>
-                  </div>
-                  <Badge>{job.status}</Badge>
-                </div>
-              </Card>
-            </Link>
+            <JobListRow
+              key={job.id}
+              job={job}
+              onUpdated={(updated) => {
+                setItems((prev) =>
+                  prev.map((j) => (j.id === updated.id ? updated : j)),
+                );
+                void load();
+              }}
+              onError={setError}
+            />
           ))}
         </div>
       )}
     </div>
+  );
+}
+
+function JobListRow({
+  job,
+  onUpdated,
+  onError,
+}: {
+  job: Job;
+  onUpdated: (job: Job) => void;
+  onError: (message: string) => void;
+}) {
+  const [saving, setSaving] = useState(false);
+  const applied = isAppliedJob(job);
+
+  async function toggleApplied(nextApplied: boolean) {
+    setSaving(true);
+    onError("");
+    try {
+      const { job: updated } = await apiFetch<{ job: Job }>(`/jobs/${job.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          status: nextApplied ? JobStatus.APPLIED : JobStatus.SAVED,
+        }),
+      });
+      onUpdated(updated);
+    } catch (err) {
+      onError(
+        err instanceof ApiError ? err.message : "Failed to update applied status",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Card className="transition hover:border-foreground/30">
+      <div className="flex items-center gap-3">
+        <label
+          className={cn(
+            "flex shrink-0 cursor-pointer flex-col items-center gap-1",
+            saving && "opacity-50",
+          )}
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
+          <input
+            type="checkbox"
+            className="size-4 cursor-pointer accent-primary"
+            checked={applied}
+            disabled={saving}
+            aria-label={applied ? "Mark as not applied" : "Mark as applied"}
+            onChange={(e) => void toggleApplied(e.target.checked)}
+          />
+          <span className="text-[10px] leading-none text-muted-foreground">
+            Applied
+          </span>
+        </label>
+
+        <Link
+          href={`/jobs/${job.id}`}
+          className="min-w-0 flex-1 cursor-pointer"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="font-medium">{job.roleTitle}</div>
+              <div className="text-sm text-muted-foreground">
+                {job.company}
+                {job.location ? ` · ${job.location}` : ""}
+              </div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                Saved {formatJobDate(job.createdAt)}
+                {job.appliedAt
+                  ? ` · Applied ${formatJobDate(job.appliedAt)}`
+                  : ""}
+              </div>
+            </div>
+            <Badge>{job.status}</Badge>
+          </div>
+        </Link>
+      </div>
+    </Card>
   );
 }
 

@@ -43,8 +43,9 @@ Rules:
 export const CANDIDATE_CONSTRAINTS = `CANDIDATE CONSTRAINTS (use for eligibility only, not for inventing skills):
 - Lives in: Pakistan
 - Needs: remote work (or contractor) payable internationally
-- Income floor: about USD 2,000+/month (or equivalent)
+- Income floor (hard minimum): about USD 1,000+/month (or equivalent) — roles at or above this are acceptable to apply
+- Nice pay bands (prefer when ranking, not hard skips): ~USD 1,500 / 2,000 / 2,500 / 3,000+ per month look better; use apply_low_priority only when pay is clearly below ~USD 1,000 or is commodity/staffing grind with no upside
 - Preferred employment: remote contractor / worldwide remote full-time
 - Hard filters: roles that require EU/US work authorization, local payroll only (e.g. Italian CCNL), or on-site Italy/EU with no worldwide contractor path → low chance
 - Preferred positioning long-term: Full-Stack Mobile Product Engineer (Flutter + NestJS/Next.js + AI)
-- Acceptable now: strong Flutter / mobile roles if remote-eligible and pay meets the floor — do not deprioritize solely because the JD is Flutter-only`
+- Acceptable now: strong Flutter / mobile roles if remote-eligible and pay meets the USD 1,000 floor — do not deprioritize solely because the JD is Flutter-only`

@@ -162,6 +162,13 @@ let JobsService = class JobsService {
     }
     async update(userId, id, dto) {
         await this.ensureOwned(userId, id);
+        let appliedAt = undefined;
+        if (dto.status === shared_1.JobStatus.APPLIED) {
+            appliedAt = new Date();
+        }
+        else if (dto.status === shared_1.JobStatus.SAVED) {
+            appliedAt = null;
+        }
         const job = await this.prisma.jobs.update({
             where: { id },
             data: {
@@ -178,7 +185,7 @@ let JobsService = class JobsService {
                     ? { notes: dto.notes === '' ? null : dto.notes }
                     : {}),
                 ...(dto.status !== undefined ? { status: dto.status } : {}),
-                applied_at: dto.status === shared_1.JobStatus.APPLIED ? new Date() : undefined,
+                ...(appliedAt !== undefined ? { applied_at: appliedAt } : {}),
                 updated_at: new Date(),
             },
         });

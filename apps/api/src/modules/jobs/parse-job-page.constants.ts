@@ -12,6 +12,7 @@ Return JSON only:
 
 Rules:
 - company and roleTitle must be non-empty strings when reasonably present; otherwise use empty string "".
+- roleTitle: the job role/title only (e.g. "Flutter Developer"), NOT "Flutter Developer at Acme". The API will append " at {company}" when saving.
 - location: city/remote/hybrid if present, else null.
 - jobUrl: a real http(s) apply/posting URL if clearly present in the paste, else null. Never invent a URL.
 - jdText: the cleaned job description only — responsibilities, requirements, benefits. Strip site chrome. Keep meaningful newlines. Do not invent requirements that are not in the paste.

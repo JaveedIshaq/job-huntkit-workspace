@@ -186,7 +186,7 @@ export default function JobDetailPage({
     setSavingStatus(true);
     setError("");
     try {
-      // The API stamps applied_at automatically when status becomes "applied".
+      // API stamps applied_at on "applied", clears it on "saved".
       const { job: updated } = await apiFetch<{ job: Job }>(`/jobs/${id}`, {
         method: "PATCH",
         body: JSON.stringify({ status }),
@@ -557,7 +557,7 @@ function EligibilityCard({ eligibility }: { eligibility: Eligibility }) {
         <Badge tone={riskTone(eligibility.languageRisk)}>
           language: {eligibility.languageRisk}
         </Badge>
-        <Badge tone="neutral">pay vs $2k: {eligibility.payVsFloor}</Badge>
+        <Badge tone="neutral">pay vs $1k: {eligibility.payVsFloor}</Badge>
       </div>
 
       {eligibility.reasons?.length > 0 && (

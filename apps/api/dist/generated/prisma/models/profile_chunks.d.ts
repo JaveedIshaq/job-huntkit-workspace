@@ -1,5 +1,5 @@
 import type * as runtime from "@prisma/client/runtime/client";
-import type * as Prisma from "../internal/prismaNamespace";
+import type * as Prisma from "../internal/prismaNamespace.js";
 export type profile_chunksModel = runtime.Types.Result.DefaultSelection<Prisma.$profile_chunksPayload>;
 export type AggregateProfile_chunks = {
     _count: Profile_chunksCountAggregateOutputType | null;

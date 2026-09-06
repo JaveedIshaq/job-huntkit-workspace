@@ -1,9 +1,23 @@
 import { PrismaService } from '../../prisma/prisma.service';
+import { OpenAiChatService } from '../analyze/openai-chat.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
+import { ParseJobPageDto } from './dto/parse-job-page.dto';
+type ParsedJobPage = {
+    company: string;
+    roleTitle: string;
+    location: string | null;
+    jobUrl: string | null;
+    jdText: string;
+};
 export declare class JobsService {
     private readonly prisma;
-    constructor(prisma: PrismaService);
+    private readonly chat;
+    constructor(prisma: PrismaService, chat: OpenAiChatService);
+    parsePage(userId: string, dto: ParseJobPageDto): Promise<{
+        fields: ParsedJobPage;
+    }>;
+    private parseExtractedFields;
     create(userId: string, dto: CreateJobDto): Promise<{
         job: {
             id: string;
@@ -50,6 +64,9 @@ export declare class JobsService {
             updatedAt: Date;
         };
         latestAnalysis: {
+            overallMatchScore: number;
+            createdAt: Date;
+            eligibility?: object | undefined;
             analysisId: string;
             runId: string | null;
             requirementSummary: string;
@@ -58,8 +75,6 @@ export declare class JobsService {
             applicationBullets: {};
             interviewQuestions: {};
             citations: {};
-            overallMatchScore: number;
-            createdAt: Date;
         } | null;
     }>;
     update(userId: string, id: string, dto: UpdateJobDto): Promise<{
@@ -84,3 +99,4 @@ export declare class JobsService {
     private toPublic;
     private toPublicAnalysis;
 }
+export {};

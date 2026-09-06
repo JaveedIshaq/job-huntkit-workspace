@@ -101,6 +101,7 @@ exports.Job_analysesScalarFieldEnum = {
     application_bullets: 'application_bullets',
     interview_questions: 'interview_questions',
     citations: 'citations',
+    eligibility: 'eligibility',
     overall_match_score: 'overall_match_score',
     created_at: 'created_at'
 };

@@ -1,5 +1,5 @@
 import type * as runtime from "@prisma/client/runtime/client";
-import type * as Prisma from "../internal/prismaNamespace";
+import type * as Prisma from "../internal/prismaNamespace.js";
 export type job_analysesModel = runtime.Types.Result.DefaultSelection<Prisma.$job_analysesPayload>;
 export type AggregateJob_analyses = {
     _count: Job_analysesCountAggregateOutputType | null;
@@ -43,6 +43,7 @@ export type Job_analysesCountAggregateOutputType = {
     application_bullets: number;
     interview_questions: number;
     citations: number;
+    eligibility: number;
     overall_match_score: number;
     created_at: number;
     _all: number;
@@ -82,6 +83,7 @@ export type Job_analysesCountAggregateInputType = {
     application_bullets?: true;
     interview_questions?: true;
     citations?: true;
+    eligibility?: true;
     overall_match_score?: true;
     created_at?: true;
     _all?: true;
@@ -125,6 +127,7 @@ export type Job_analysesGroupByOutputType = {
     application_bullets: runtime.JsonValue;
     interview_questions: runtime.JsonValue;
     citations: runtime.JsonValue;
+    eligibility: runtime.JsonValue;
     overall_match_score: number | null;
     created_at: Date;
     _count: Job_analysesCountAggregateOutputType | null;
@@ -150,6 +153,7 @@ export type job_analysesWhereInput = {
     application_bullets?: Prisma.JsonFilter<"job_analyses">;
     interview_questions?: Prisma.JsonFilter<"job_analyses">;
     citations?: Prisma.JsonFilter<"job_analyses">;
+    eligibility?: Prisma.JsonFilter<"job_analyses">;
     overall_match_score?: Prisma.IntNullableFilter<"job_analyses"> | number | null;
     created_at?: Prisma.DateTimeFilter<"job_analyses"> | Date | string;
     ai_runs?: Prisma.XOR<Prisma.Ai_runsNullableScalarRelationFilter, Prisma.ai_runsWhereInput> | null;
@@ -167,6 +171,7 @@ export type job_analysesOrderByWithRelationInput = {
     application_bullets?: Prisma.SortOrder;
     interview_questions?: Prisma.SortOrder;
     citations?: Prisma.SortOrder;
+    eligibility?: Prisma.SortOrder;
     overall_match_score?: Prisma.SortOrderInput | Prisma.SortOrder;
     created_at?: Prisma.SortOrder;
     ai_runs?: Prisma.ai_runsOrderByWithRelationInput;
@@ -187,6 +192,7 @@ export type job_analysesWhereUniqueInput = Prisma.AtLeast<{
     application_bullets?: Prisma.JsonFilter<"job_analyses">;
     interview_questions?: Prisma.JsonFilter<"job_analyses">;
     citations?: Prisma.JsonFilter<"job_analyses">;
+    eligibility?: Prisma.JsonFilter<"job_analyses">;
     overall_match_score?: Prisma.IntNullableFilter<"job_analyses"> | number | null;
     created_at?: Prisma.DateTimeFilter<"job_analyses"> | Date | string;
     ai_runs?: Prisma.XOR<Prisma.Ai_runsNullableScalarRelationFilter, Prisma.ai_runsWhereInput> | null;
@@ -204,6 +210,7 @@ export type job_analysesOrderByWithAggregationInput = {
     application_bullets?: Prisma.SortOrder;
     interview_questions?: Prisma.SortOrder;
     citations?: Prisma.SortOrder;
+    eligibility?: Prisma.SortOrder;
     overall_match_score?: Prisma.SortOrderInput | Prisma.SortOrder;
     created_at?: Prisma.SortOrder;
     _count?: Prisma.job_analysesCountOrderByAggregateInput;
@@ -226,6 +233,7 @@ export type job_analysesScalarWhereWithAggregatesInput = {
     application_bullets?: Prisma.JsonWithAggregatesFilter<"job_analyses">;
     interview_questions?: Prisma.JsonWithAggregatesFilter<"job_analyses">;
     citations?: Prisma.JsonWithAggregatesFilter<"job_analyses">;
+    eligibility?: Prisma.JsonWithAggregatesFilter<"job_analyses">;
     overall_match_score?: Prisma.IntNullableWithAggregatesFilter<"job_analyses"> | number | null;
     created_at?: Prisma.DateTimeWithAggregatesFilter<"job_analyses"> | Date | string;
 };
@@ -237,6 +245,7 @@ export type job_analysesCreateInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: number | null;
     created_at?: Date | string;
     ai_runs?: Prisma.ai_runsCreateNestedOneWithoutJob_analysesInput;
@@ -254,6 +263,7 @@ export type job_analysesUncheckedCreateInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: number | null;
     created_at?: Date | string;
 };
@@ -265,6 +275,7 @@ export type job_analysesUpdateInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     ai_runs?: Prisma.ai_runsUpdateOneWithoutJob_analysesNestedInput;
@@ -282,6 +293,7 @@ export type job_analysesUncheckedUpdateInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -296,6 +308,7 @@ export type job_analysesCreateManyInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: number | null;
     created_at?: Date | string;
 };
@@ -307,6 +320,7 @@ export type job_analysesUpdateManyMutationInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -321,6 +335,7 @@ export type job_analysesUncheckedUpdateManyInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -343,6 +358,7 @@ export type job_analysesCountOrderByAggregateInput = {
     application_bullets?: Prisma.SortOrder;
     interview_questions?: Prisma.SortOrder;
     citations?: Prisma.SortOrder;
+    eligibility?: Prisma.SortOrder;
     overall_match_score?: Prisma.SortOrder;
     created_at?: Prisma.SortOrder;
 };
@@ -492,6 +508,7 @@ export type job_analysesCreateWithoutAi_runsInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: number | null;
     created_at?: Date | string;
     jobs: Prisma.jobsCreateNestedOneWithoutJob_analysesInput;
@@ -507,6 +524,7 @@ export type job_analysesUncheckedCreateWithoutAi_runsInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: number | null;
     created_at?: Date | string;
 };
@@ -545,6 +563,7 @@ export type job_analysesScalarWhereInput = {
     application_bullets?: Prisma.JsonFilter<"job_analyses">;
     interview_questions?: Prisma.JsonFilter<"job_analyses">;
     citations?: Prisma.JsonFilter<"job_analyses">;
+    eligibility?: Prisma.JsonFilter<"job_analyses">;
     overall_match_score?: Prisma.IntNullableFilter<"job_analyses"> | number | null;
     created_at?: Prisma.DateTimeFilter<"job_analyses"> | Date | string;
 };
@@ -556,6 +575,7 @@ export type job_analysesCreateWithoutJobsInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: number | null;
     created_at?: Date | string;
     ai_runs?: Prisma.ai_runsCreateNestedOneWithoutJob_analysesInput;
@@ -571,6 +591,7 @@ export type job_analysesUncheckedCreateWithoutJobsInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: number | null;
     created_at?: Date | string;
 };
@@ -603,6 +624,7 @@ export type job_analysesCreateWithoutUsersInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: number | null;
     created_at?: Date | string;
     ai_runs?: Prisma.ai_runsCreateNestedOneWithoutJob_analysesInput;
@@ -618,6 +640,7 @@ export type job_analysesUncheckedCreateWithoutUsersInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: number | null;
     created_at?: Date | string;
 };
@@ -652,6 +675,7 @@ export type job_analysesCreateManyAi_runsInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: number | null;
     created_at?: Date | string;
 };
@@ -663,6 +687,7 @@ export type job_analysesUpdateWithoutAi_runsInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     jobs?: Prisma.jobsUpdateOneRequiredWithoutJob_analysesNestedInput;
@@ -678,6 +703,7 @@ export type job_analysesUncheckedUpdateWithoutAi_runsInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -691,6 +717,7 @@ export type job_analysesUncheckedUpdateManyWithoutAi_runsInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -704,6 +731,7 @@ export type job_analysesCreateManyJobsInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: number | null;
     created_at?: Date | string;
 };
@@ -715,6 +743,7 @@ export type job_analysesUpdateWithoutJobsInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     ai_runs?: Prisma.ai_runsUpdateOneWithoutJob_analysesNestedInput;
@@ -730,6 +759,7 @@ export type job_analysesUncheckedUpdateWithoutJobsInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -743,6 +773,7 @@ export type job_analysesUncheckedUpdateManyWithoutJobsInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -756,6 +787,7 @@ export type job_analysesCreateManyUsersInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: number | null;
     created_at?: Date | string;
 };
@@ -767,6 +799,7 @@ export type job_analysesUpdateWithoutUsersInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     ai_runs?: Prisma.ai_runsUpdateOneWithoutJob_analysesNestedInput;
@@ -782,6 +815,7 @@ export type job_analysesUncheckedUpdateWithoutUsersInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -795,6 +829,7 @@ export type job_analysesUncheckedUpdateManyWithoutUsersInput = {
     application_bullets?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     interview_questions?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     citations?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    eligibility?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     overall_match_score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -809,6 +844,7 @@ export type job_analysesSelect<ExtArgs extends runtime.Types.Extensions.Internal
     application_bullets?: boolean;
     interview_questions?: boolean;
     citations?: boolean;
+    eligibility?: boolean;
     overall_match_score?: boolean;
     created_at?: boolean;
     ai_runs?: boolean | Prisma.job_analyses$ai_runsArgs<ExtArgs>;
@@ -826,6 +862,7 @@ export type job_analysesSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
     application_bullets?: boolean;
     interview_questions?: boolean;
     citations?: boolean;
+    eligibility?: boolean;
     overall_match_score?: boolean;
     created_at?: boolean;
     ai_runs?: boolean | Prisma.job_analyses$ai_runsArgs<ExtArgs>;
@@ -843,6 +880,7 @@ export type job_analysesSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
     application_bullets?: boolean;
     interview_questions?: boolean;
     citations?: boolean;
+    eligibility?: boolean;
     overall_match_score?: boolean;
     created_at?: boolean;
     ai_runs?: boolean | Prisma.job_analyses$ai_runsArgs<ExtArgs>;
@@ -860,10 +898,11 @@ export type job_analysesSelectScalar = {
     application_bullets?: boolean;
     interview_questions?: boolean;
     citations?: boolean;
+    eligibility?: boolean;
     overall_match_score?: boolean;
     created_at?: boolean;
 };
-export type job_analysesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "job_id" | "user_id" | "ai_run_id" | "requirement_summary" | "strengths" | "gaps" | "application_bullets" | "interview_questions" | "citations" | "overall_match_score" | "created_at", ExtArgs["result"]["job_analyses"]>;
+export type job_analysesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "job_id" | "user_id" | "ai_run_id" | "requirement_summary" | "strengths" | "gaps" | "application_bullets" | "interview_questions" | "citations" | "eligibility" | "overall_match_score" | "created_at", ExtArgs["result"]["job_analyses"]>;
 export type job_analysesInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     ai_runs?: boolean | Prisma.job_analyses$ai_runsArgs<ExtArgs>;
     jobs?: boolean | Prisma.jobsDefaultArgs<ExtArgs>;
@@ -897,6 +936,7 @@ export type $job_analysesPayload<ExtArgs extends runtime.Types.Extensions.Intern
         application_bullets: runtime.JsonValue;
         interview_questions: runtime.JsonValue;
         citations: runtime.JsonValue;
+        eligibility: runtime.JsonValue;
         overall_match_score: number | null;
         created_at: Date;
     }, ExtArgs["result"]["job_analyses"]>;
@@ -969,6 +1009,7 @@ export interface job_analysesFieldRefs {
     readonly application_bullets: Prisma.FieldRef<"job_analyses", 'Json'>;
     readonly interview_questions: Prisma.FieldRef<"job_analyses", 'Json'>;
     readonly citations: Prisma.FieldRef<"job_analyses", 'Json'>;
+    readonly eligibility: Prisma.FieldRef<"job_analyses", 'Json'>;
     readonly overall_match_score: Prisma.FieldRef<"job_analyses", 'Int'>;
     readonly created_at: Prisma.FieldRef<"job_analyses", 'DateTime'>;
 }

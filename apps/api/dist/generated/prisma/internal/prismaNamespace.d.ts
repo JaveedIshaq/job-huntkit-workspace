@@ -1,7 +1,7 @@
 import * as runtime from "@prisma/client/runtime/client";
-import type * as Prisma from "../models";
-import { type PrismaClient } from "./class";
-export type * from '../models';
+import type * as Prisma from "../models.js";
+import { type PrismaClient } from "./class.js";
+export type * from '../models.js';
 export type DMMF = typeof runtime.DMMF;
 export type PrismaPromise<T> = runtime.Types.Public.PrismaPromise<T>;
 export declare const PrismaClientKnownRequestError: typeof runtime.PrismaClientKnownRequestError;
@@ -667,6 +667,7 @@ export declare const Job_analysesScalarFieldEnum: {
     readonly application_bullets: "application_bullets";
     readonly interview_questions: "interview_questions";
     readonly citations: "citations";
+    readonly eligibility: "eligibility";
     readonly overall_match_score: "overall_match_score";
     readonly created_at: "created_at";
 };

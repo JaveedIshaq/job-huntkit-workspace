@@ -3,8 +3,8 @@ export declare class UpdateJobDto {
     company?: string;
     roleTitle?: string;
     jdText?: string;
-    jobUrl?: string;
-    location?: string;
-    notes?: string;
+    jobUrl?: string | null;
+    location?: string | null;
+    notes?: string | null;
     status?: JobStatus;
 }

@@ -17,6 +17,18 @@ const openai_chat_service_1 = require("./openai-chat.service");
 const analyze_constants_1 = require("./analyze.constants");
 const JD_EMBED_MAX_CHARS = 2000;
 const CHAT_MODEL = 'gpt-4o-mini';
+const DEFAULT_ELIGIBILITY = {
+    verdict: 'skip',
+    confidence: 'low',
+    remoteScope: 'unclear',
+    employmentType: 'unclear',
+    workAuthRisk: 'unclear',
+    languageRisk: 'unclear',
+    payVsFloor: 'unclear',
+    roleFitNote: '',
+    reasons: ['Could not assess eligibility from the model response.'],
+    summary: 'Eligibility unclear — re-analyze or verify remote/worldwide hiring manually.',
+};
 let AnalyzeService = class AnalyzeService {
     prisma;
     retrieval;
@@ -59,7 +71,24 @@ let AnalyzeService = class AnalyzeService {
         const context = results
             .map((c) => `[chunkId: ${c.id}] (source: ${c.source_title}, score: ${c.score.toFixed(3)})\n${c.content}`)
             .join('\n\n---\n\n');
-        const userPrompt = `JOB DESCRIPTION:\n${job.jd_text}\n\nPROFILE CONTEXT (the only facts you may use):\n${context}`;
+        const metaLines = [
+            job.location ? `Job location field: ${job.location}` : null,
+            job.job_url ? `Job URL field: ${job.job_url}` : null,
+            `Company field: ${job.company}`,
+            `Role title field: ${job.role_title}`,
+        ]
+            .filter(Boolean)
+            .join('\n');
+        const userPrompt = `${analyze_constants_1.CANDIDATE_CONSTRAINTS}
+
+JOB METADATA (from saved job record):
+${metaLines}
+
+JOB DESCRIPTION:
+${job.jd_text}
+
+PROFILE CONTEXT (the only facts you may use for strengths/gaps/bullets/questions):
+${context}`;
         const startedAt = Date.now();
         let parsed;
         let chatModel = CHAT_MODEL;
@@ -107,7 +136,11 @@ let AnalyzeService = class AnalyzeService {
                 retrieved_chunk_ids: chunkIds,
                 input_preview: query.slice(0, 500),
                 output_preview: JSON.stringify(parsed).slice(0, 500),
-                metadata: { bestScore, threshold },
+                metadata: {
+                    bestScore,
+                    threshold,
+                    eligibilityVerdict: parsed.eligibility.verdict,
+                },
             },
         });
         const analysis = await this.prisma.job_analyses.create({
@@ -121,6 +154,7 @@ let AnalyzeService = class AnalyzeService {
                 application_bullets: parsed.applicationBullets,
                 interview_questions: parsed.interviewQuestions,
                 citations,
+                eligibility: parsed.eligibility,
                 overall_match_score: overallMatchScore,
             },
         });
@@ -135,6 +169,7 @@ let AnalyzeService = class AnalyzeService {
             applicationBullets: parsed.applicationBullets,
             interviewQuestions: parsed.interviewQuestions,
             citations,
+            eligibility: parsed.eligibility,
             overallMatchScore,
             usage,
             latencyMs,
@@ -163,7 +198,77 @@ let AnalyzeService = class AnalyzeService {
                 ? obj.interviewQuestions
                 : [],
             overallMatchScore: typeof obj.overallMatchScore === 'number' ? obj.overallMatchScore : 0,
+            eligibility: this.parseEligibility(obj.eligibility),
         };
+    }
+    parseEligibility(raw) {
+        if (!raw || typeof raw !== 'object')
+            return { ...DEFAULT_ELIGIBILITY };
+        const e = raw;
+        const verdict = this.oneOf(e.verdict, [
+            'apply',
+            'apply_low_priority',
+            'skip',
+        ]);
+        const confidence = this.oneOf(e.confidence, [
+            'high',
+            'medium',
+            'low',
+        ]);
+        const remoteScope = this.oneOf(e.remoteScope, [
+            'worldwide',
+            'country_or_region_only',
+            'onsite_or_hybrid',
+            'unclear',
+        ]);
+        const employmentType = this.oneOf(e.employmentType, [
+            'contractor_b2b',
+            'local_payroll',
+            'staffing_agency',
+            'unclear',
+        ]);
+        const workAuthRisk = this.oneOf(e.workAuthRisk, [
+            'low',
+            'medium',
+            'high',
+            'unclear',
+        ]);
+        const languageRisk = this.oneOf(e.languageRisk, [
+            'low',
+            'medium',
+            'high',
+            'unclear',
+        ]);
+        const payVsFloor = this.oneOf(e.payVsFloor, [
+            'above',
+            'near',
+            'below',
+            'unclear',
+        ]);
+        const reasons = Array.isArray(e.reasons)
+            ? e.reasons.filter((r) => typeof r === 'string').slice(0, 8)
+            : DEFAULT_ELIGIBILITY.reasons;
+        return {
+            verdict: verdict ?? DEFAULT_ELIGIBILITY.verdict,
+            confidence: confidence ?? DEFAULT_ELIGIBILITY.confidence,
+            remoteScope: remoteScope ?? DEFAULT_ELIGIBILITY.remoteScope,
+            employmentType: employmentType ?? DEFAULT_ELIGIBILITY.employmentType,
+            workAuthRisk: workAuthRisk ?? DEFAULT_ELIGIBILITY.workAuthRisk,
+            languageRisk: languageRisk ?? DEFAULT_ELIGIBILITY.languageRisk,
+            payVsFloor: payVsFloor ?? DEFAULT_ELIGIBILITY.payVsFloor,
+            roleFitNote: typeof e.roleFitNote === 'string'
+                ? e.roleFitNote
+                : DEFAULT_ELIGIBILITY.roleFitNote,
+            reasons: reasons.length ? reasons : DEFAULT_ELIGIBILITY.reasons,
+            summary: typeof e.summary === 'string' && e.summary.trim()
+                ? e.summary.trim()
+                : DEFAULT_ELIGIBILITY.summary,
+        };
+    }
+    oneOf(value, allowed) {
+        return typeof value === 'string' && allowed.includes(value)
+            ? value
+            : undefined;
     }
     clampScore(n) {
         if (!Number.isFinite(n))

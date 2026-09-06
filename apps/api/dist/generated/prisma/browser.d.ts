@@ -1,7 +1,7 @@
-import * as Prisma from './internal/prismaNamespaceBrowser';
+import * as Prisma from './internal/prismaNamespaceBrowser.js';
 export { Prisma };
-export * as $Enums from './enums';
-export * from './enums';
+export * as $Enums from './enums.js';
+export * from './enums.js';
 export type ai_runs = Prisma.ai_runsModel;
 export type job_analyses = Prisma.job_analysesModel;
 export type jobs = Prisma.jobsModel;

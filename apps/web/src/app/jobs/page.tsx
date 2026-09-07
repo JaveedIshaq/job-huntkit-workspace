@@ -193,34 +193,71 @@ function JobListRow({
           href={`/jobs/${job.id}`}
           className="min-w-0 flex-1 cursor-pointer"
         >
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <div className="font-medium">{job.roleTitle}</div>
-              <div className="text-sm text-muted-foreground">
-                {job.location || "Location not set"}
-              </div>
-              <div className="mt-2 flex flex-wrap gap-2">
+          <div className="min-w-0">
+            <div className="font-medium">{job.roleTitle}</div>
+            <div className="text-sm text-muted-foreground">
+              {job.location || "Location not set"}
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Badge
+                tone="blue"
+                className="max-w-full whitespace-normal text-left leading-snug"
+              >
+                Saved {formatJobDateTime(job.createdAt)}
+              </Badge>
+              {job.appliedAt ? (
                 <Badge
-                  tone="blue"
+                  tone="green"
                   className="max-w-full whitespace-normal text-left leading-snug"
                 >
-                  Saved {formatJobDateTime(job.createdAt)}
+                  Applied {formatJobDateTime(job.appliedAt)}
                 </Badge>
-                {job.appliedAt ? (
-                  <Badge
-                    tone="green"
-                    className="max-w-full whitespace-normal text-left leading-snug"
-                  >
-                    Applied {formatJobDateTime(job.appliedAt)}
-                  </Badge>
-                ) : null}
-              </div>
+              ) : null}
             </div>
-            <Badge>{job.status === JobStatus.SAVED && job.appliedAt ? JobStatus.APPLIED : job.status}</Badge>
           </div>
         </Link>
+
+        <div className="flex shrink-0 items-center gap-2">
+          {job.jobUrl ? (
+            <a
+              href={job.jobUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open job posting in a new tab"
+              title="Open job posting"
+              className="inline-flex size-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition hover:border-foreground/30 hover:text-foreground"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLinkIcon className="size-4" />
+            </a>
+          ) : null}
+          <Badge>
+            {job.status === JobStatus.SAVED && job.appliedAt
+              ? JobStatus.APPLIED
+              : job.status}
+          </Badge>
+        </div>
       </div>
     </Card>
+  );
+}
+
+function ExternalLinkIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
+    </svg>
   );
 }
 

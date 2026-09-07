@@ -313,20 +313,40 @@ export default function JobDetailPage({
         </Card>
       ) : (
         <>
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-semibold">{job.roleTitle}</h1>
-              <p className="text-muted-foreground">
-                {job.company}
-                {job.location ? ` · ${job.location}` : ""}
-              </p>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start gap-2.5">
+                  {job.jobUrl ? (
+                    <a
+                      href={job.jobUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Open job posting in a new tab"
+                      title="Open job posting"
+                      className="mt-1 inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-border text-muted-foreground transition hover:border-foreground/30 hover:text-foreground"
+                    >
+                      <ExternalLinkIcon className="size-4" />
+                    </a>
+                  ) : null}
+                  <div className="min-w-0">
+                    <h1 className="text-2xl font-semibold leading-snug tracking-tight">
+                      {job.roleTitle}
+                    </h1>
+                    <p className="mt-1 text-muted-foreground">
+                      {job.company}
+                      {job.location ? ` · ${job.location}` : ""}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
                 <Select
                   aria-label="Job status"
                   value={job.status}
                   disabled={savingStatus}
                   onChange={(e) => updateStatus(e.target.value)}
-                  className="w-auto capitalize"
+                  className="w-auto min-w-30 capitalize py-1.5"
                 >
                   {JOB_STATUSES.map((s) => (
                     <option key={s} value={s}>
@@ -334,43 +354,31 @@ export default function JobDetailPage({
                     </option>
                   ))}
                 </Select>
-                {job.appliedAt && (
-                  <span className="text-xs text-muted-foreground">
-                    Applied{" "}
-                    {new Date(job.appliedAt).toLocaleString(undefined, {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                      hour: "numeric",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                )}
-                {job.jobUrl && (
-                  <a
-                    href={job.jobUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-sm underline"
-                  >
-                    Job posting ↗
-                  </a>
-                )}
+                <Button type="button" variant="secondary" onClick={startEdit}>
+                  Edit
+                </Button>
+                <Button onClick={analyze} disabled={analyzing}>
+                  {analyzing
+                    ? "Analyzing…"
+                    : analysis
+                      ? "Re-analyze"
+                      : "Analyze with AI"}
+                </Button>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="secondary" onClick={startEdit}>
-                Edit
-              </Button>
-              <Button onClick={analyze} disabled={analyzing}>
-                {analyzing
-                  ? "Analyzing…"
-                  : analysis
-                    ? "Re-analyze"
-                    : "Analyze with AI"}
-              </Button>
-            </div>
+            {job.appliedAt ? (
+              <p className="text-xs text-muted-foreground">
+                Applied{" "}
+                {new Date(job.appliedAt).toLocaleString(undefined, {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              </p>
+            ) : null}
           </div>
 
           {analyzedAt && (
@@ -410,6 +418,25 @@ export default function JobDetailPage({
         </>
       )}
     </div>
+  );
+}
+
+function ExternalLinkIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
+    </svg>
   );
 }
 

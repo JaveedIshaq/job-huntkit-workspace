@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -37,26 +38,35 @@ export class ProfileController {
   }
 
   @Get('sources/:id')
-  getOne(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+  getOne(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     return this.ingest.getSource(user.id, id);
   }
 
   @Patch('sources/:id')
   update(
     @CurrentUser() user: AuthUser,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateSourceDto,
   ) {
     return this.ingest.updateSource(user.id, id, dto);
   }
 
   @Delete('sources/:id')
-  remove(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+  remove(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     return this.ingest.deleteSource(user.id, id);
   }
 
   @Post('sources/:id/reindex')
-  reindex(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+  reindex(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     return this.ingest.reindex(user.id, id);
   }
 

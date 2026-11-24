@@ -64,22 +64,7 @@ CREATE TABLE jobs (
 
 CREATE INDEX idx_jobs_user_status ON jobs(user_id, status);
 
--- Latest AI analysis per job (keep history: multiple rows OK)
-CREATE TABLE job_analyses (
-  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  job_id              UUID NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
-  user_id             UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  ai_run_id           UUID REFERENCES ai_runs(id),
-  requirement_summary TEXT,
-  strengths           JSONB NOT NULL DEFAULT '[]',
-  gaps                JSONB NOT NULL DEFAULT '[]',
-  application_bullets JSONB NOT NULL DEFAULT '[]',
-  interview_questions JSONB NOT NULL DEFAULT '[]',
-  citations           JSONB NOT NULL DEFAULT '[]',
-  overall_match_score INT CHECK (overall_match_score BETWEEN 0 AND 100),
-  created_at          TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
+-- AI call log (must exist before job_analyses, which references it)
 CREATE TABLE ai_runs (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id           UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -99,3 +84,19 @@ CREATE TABLE ai_runs (
 );
 
 CREATE INDEX idx_ai_runs_user_created ON ai_runs(user_id, created_at DESC);
+
+-- Latest AI analysis per job (keep history: multiple rows OK)
+CREATE TABLE job_analyses (
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  job_id              UUID NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
+  user_id             UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  ai_run_id           UUID REFERENCES ai_runs(id),
+  requirement_summary TEXT,
+  strengths           JSONB NOT NULL DEFAULT '[]',
+  gaps                JSONB NOT NULL DEFAULT '[]',
+  application_bullets JSONB NOT NULL DEFAULT '[]',
+  interview_questions JSONB NOT NULL DEFAULT '[]',
+  citations           JSONB NOT NULL DEFAULT '[]',
+  overall_match_score INT CHECK (overall_match_score BETWEEN 0 AND 100),
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT now()
+);

@@ -1,4 +1,11 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../shared/guards/jwt-auth.guard';
 import { CurrentUser } from '../shared/decorators/current-user.decorator';
 import type { AuthUser } from '../shared/types/auth-user.type';
@@ -23,7 +30,10 @@ export class AdminController {
   }
 
   @Get('ai-runs/:id')
-  getAiRun(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+  getAiRun(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     return this.admin.getAiRun(user.id, id);
   }
 

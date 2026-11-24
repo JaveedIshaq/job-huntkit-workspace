@@ -48,6 +48,9 @@ export class PrismaExceptionFilter implements ExceptionFilter {
       case 'P1002': // database server timed out
       case 'P1008': // operation timed out
       case 'P1017': // server closed the connection
+      case 'ECONNREFUSED': // pg adapter: connection refused
+      case 'ETIMEDOUT': // pg adapter: connection timed out
+      case 'ENOTFOUND': // pg adapter: database host not found (DNS)
         return {
           status: HttpStatus.SERVICE_UNAVAILABLE,
           message:

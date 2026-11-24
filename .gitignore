@@ -7,3 +7,7 @@ node_modules/
 .env.*.local
 apps/api/.env
 apps/web/.env.local
+
+# Generated docs and diagrams (local only)
+.learn-alchemy/
+.archify/

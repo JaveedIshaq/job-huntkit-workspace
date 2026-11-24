@@ -3,7 +3,7 @@
 # whole workspace above it (so the @huntkit/shared dependency resolves).
 [build]
   base = "apps/web"
-  command = "pnpm build"
+  command = "pnpm --filter @huntkit/shared build && pnpm build"
   publish = ".next"          # relative to base → apps/web/.next
 
 [build.environment]

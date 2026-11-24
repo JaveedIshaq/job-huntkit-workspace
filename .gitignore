@@ -11,3 +11,7 @@ apps/web/.env.local
 # Generated docs and diagrams (local only)
 .learn-alchemy/
 .archify/
+
+# build output — generated on deploy (Render builds api + shared; Netlify builds shared + web)
+dist/
+*.tsbuildinfo

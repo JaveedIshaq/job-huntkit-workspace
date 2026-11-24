@@ -1,0 +1,3 @@
+# Keep GitHub language stats focused on app code
+.cursor/** linguist-vendored
+apps/api/dist/** linguist-generated

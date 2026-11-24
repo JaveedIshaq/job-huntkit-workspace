@@ -10,7 +10,11 @@ import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { ParseJobPageDto } from './dto/parse-job-page.dto';
 import { PARSE_JOB_PAGE_SYSTEM_PROMPT } from './parse-job-page.constants';
-import { JobStatus, composeRoleAtCompany, rewriteRoleCompany } from '@huntkit/shared';
+import {
+  JobStatus,
+  composeRoleAtCompany,
+  rewriteRoleCompany,
+} from '@huntkit/shared';
 
 type PublicJobSource = {
   id: string;
@@ -161,6 +165,8 @@ export class JobsService {
         location: dto.location ?? null,
         notes: dto.notes ?? null,
         status: dto.status ?? JobStatus.SAVED,
+        // Same rule as update(): creating a job as "applied" stamps the date.
+        applied_at: dto.status === JobStatus.APPLIED ? new Date() : null,
       },
     });
     return { job: this.toPublic(job) };

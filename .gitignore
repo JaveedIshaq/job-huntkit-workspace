@@ -15,3 +15,7 @@ apps/web/.env.local
 # build output — generated on deploy (Render builds api + shared; Netlify builds shared + web)
 dist/
 *.tsbuildinfo
+
+# local caches — never commit
+.turbo/
+.pnpm-store/
